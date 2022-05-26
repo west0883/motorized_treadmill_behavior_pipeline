@@ -286,10 +286,11 @@ save([dir_out 'Behavior_Conditions.mat'], 'Conditions');
 
 
 %% Make an iterations structure for each period type. 
-% Create a periods structure
-speeds = [0, 1600, 2000, 2400, 2800]; 
-accels_startstop = [400, 800];
-accels_acceldecel = [200, 800]; 
+% Create a periods structure (make them all strings because they're names
+% of speeds/accels).
+speeds = {'0', '1600', '2000', '2400', '2800'}; 
+accels_startstop = {'400', '800'};
+accels_acceldecel = {'200', '800'}; 
 
 % Load conditions structure.
 load([dir_exper 'Behavior_Conditions.mat']);
@@ -297,6 +298,7 @@ load([dir_exper 'Behavior_Conditions.mat']);
 for condi =1:size(Conditions,2)
 
     short_name = Conditions(condi).short;
+    periods(condi).name = short_name;
 
     % Only make fields for things we actually care about
     % per condition type
@@ -309,7 +311,6 @@ for condi =1:size(Conditions,2)
         % current speed subdivisions.  Motor maintaining, warning maintaining, probe warning maintaining,and motor no change
         % care about speeds, including 0; and no warning
         case num2cell([9:11 19:21 26 3,12,13,17,22, 23])
-             
              periods(condi).current_speed = speeds;
              periods(condi).current_accel = NaN; 
              periods(condi).previous_speed = NaN;
