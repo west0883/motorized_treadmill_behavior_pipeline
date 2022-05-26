@@ -97,9 +97,10 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
         if behavior_period.time_range(2) <= parameters.skip/parameters.channelNumber
             continue 
         % If only the beginning of the time range falls before the skipped 
-        % time range, truncate that period to not include the skip     
+        % time range, truncate that period to not include the skip, make the activity tag be the continued rest    
         elseif behavior_period.time_range(1) <= parameters.skip/parameters.channelNumber
              behavior_period.time_range(1) = parameters.skip/parameters.channelNumber + 1; 
+             trial{i, activity_column} = 27;
         end 
          
         % If two consecutive times are the same (happens when motor is
@@ -212,10 +213,10 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
                    % Concatenate continued period, depending on if rest or not
                    if activity_tag == 5
                        % Put in continued rest
-                       eval(['all_periods.' parameters.Conditions(27).short '= [all_periods.' parameters.Conditions(activity_tag).short '; continued_behavior_period];']);
+                       eval(['all_periods.' parameters.Conditions(27).short '= [all_periods.' parameters.Conditions(27).short '; continued_behavior_period];']);
                    else
                        % Put in continued walking
-                       eval(['all_periods.' parameters.Conditions(26).short '= [all_periods.' parameters.Conditions(activity_tag).short '; continued_behavior_period];']);
+                       eval(['all_periods.' parameters.Conditions(26).short '= [all_periods.' parameters.Conditions(26).short '; continued_behavior_period];']);
                    end
                    
                 % If time range isn't long enough, concatenate just as the "finished"
