@@ -12,21 +12,12 @@ clear all;
 % Output Directories
 
 % Create the experiment name. This is used to name the output folder. 
-%parameters.experiment_name='Random Motorized Treadmill';
+parameters.experiment_name='Random Motorized Treadmill';
 
 % Output directory name bases
 parameters.dir_base='Y:\Sarah\Analysis\Experiments\';
-%parameters.dir_exper=[parameters.dir_base parameters.experiment_name '\']; 
-
-% Length of time (in seconds) you want continued behaviors to be divided
-% into.
-parameters.continued_chunk_length = 3; 
-
-% FOR 3S CONTINUED BEHAVIOR
-parameters.experiment_name= ['Random Motorized Treadmill\' num2str(parameters.continued_chunk_length) 's continued'];
 parameters.dir_exper=[parameters.dir_base parameters.experiment_name '\']; 
 
-parameters.dir_exper_original = [parameters.dir_base 'Random Motorized Treadmill\']; 
 % *********************************************************
 % Data to process
 
@@ -44,6 +35,7 @@ parameters.Conditions = Conditions;
 
 % ****Change here if there are specific mice, days, and/or stacks you want to work with**** 
 parameters.mice_all = parameters.mice_all(1);
+%parameters.mice_all(1).days = parameters.mice_all(1).days(13:end);
 
 
 % **********************************************************************8
@@ -78,6 +70,9 @@ parameters.fps= 20;
 % fluorescence took ~2.5 s to return to baseline after the mice stopped.)
 parameters.continued_window = 3; 
 
+% Length of time (in seconds) you want continued behaviors to be divided
+% into.
+parameters.continued_chunk_length = 1; 
 
 % Number of channels from brain data (need this to calculate correct
 % "skip" time length).
@@ -101,8 +96,16 @@ parameters.wheel_radius = 8.5;
 % exact whole second or half second in duration. 
 parameters.smallest_time_increment = 0.5 * parameters.fps;
 
+% FOR 3S CONTINUED BEHAVIOR
+% parameters.experiment_name= ['Random Motorized Treadmill\' num2str(parameters.continued_chunk_length) 's continued'];
+% parameters.dir_exper=[parameters.dir_base parameters.experiment_name '\']; 
 
 %% Extract data and save as .mat file -- with Putty
+
+% Go back and reset mice_all each time! 
+parameters.mice_all = mice_all(4:6);
+% parameters.mice_all(1).days = parameters.mice_all(1).days(12);
+% parameters.mice_all(1).days(1).stacks = {'16'};
 
 % Always clear loop list first. 
 if isfield(parameters, 'loop_list')
@@ -112,11 +115,15 @@ end
 % Was PUTTY used for the recording? 
 parameters.putty_flag = true;
 
-parameters.mice_all = mice_all(1);
-
 % Get only mice_all days with putty_for_motor = 'yes'.
 for i = 1:numel(parameters.mice_all)
-    putty_flags = strcmp({parameters.mice_all(i).days.putty_for_motor}, 'yes'); 
+    putty_flags = NaN(numel(parameters.mice_all(i).days),1);
+    for dayi = 1: numel(parameters.mice_all(i).days)
+        % Get the putty value, remove any spaces
+        value = strrep(parameters.mice_all(i).days(dayi).putty_for_motor, ' ', '');
+        % Compare to 'yes'
+        putty_flags(dayi) = strcmp(value, 'yes');
+    end
     parameters.mice_all(i).days(~putty_flags) = [];
 end 
 
@@ -137,7 +144,7 @@ parameters.loop_list.things_to_load.log.level = 'log';
 parameters.loop_list.things_to_load.log.load_function = @readtext;
 
 % Output values. 
-parameters.loop_list.things_to_save.trial.dir = {[parameters.dir_exper 'behavior\motorized\extracted motor data\'], 'mouse', '\', 'day', '\bad labels\'};
+parameters.loop_list.things_to_save.trial.dir = {[parameters.dir_exper 'behavior\motorized\extracted motor data\'], 'mouse', '\', 'day', '\'};
 parameters.loop_list.things_to_save.trial.filename= {'trial', 'stack', '.mat'};
 parameters.loop_list.things_to_save.trial.variable= {'trial'}; 
 parameters.loop_list.things_to_save.trial.level = 'stack';
@@ -146,20 +153,26 @@ RunAnalysis({@extractMotorData}, parameters);
 
 %% Extract data and save as .mat file -- with NO Putty
 
+% Go back and reset mice_all each time! 
+parameters.mice_all = mice_all;
+
 % Always clear loop list first. 
 if isfield(parameters, 'loop_list')
 parameters = rmfield(parameters,'loop_list');
 end
 
-% Reset mice_all (because you're changing it for the Putty only stacks)
-parameters.mice_all = mice_all; 
-parameters.mice_all = parameters.mice_all(1);
-
 % Get only mice_all days with putty_for_motor = 'no'.
 for i = 1:numel(parameters.mice_all)
-    putty_flags = strcmp({parameters.mice_all(i).days.putty_for_motor}, 'no'); 
+    putty_flags = NaN(numel(parameters.mice_all(i).days),1);
+    for dayi = 1: numel(parameters.mice_all(i).days)
+        % Get the putty value, remove any spaces
+        value = strrep(parameters.mice_all(i).days(dayi).putty_for_motor, ' ', '');
+        % Compare to 'no'
+        putty_flags(dayi) = strcmp(value, 'no');
+    end
     parameters.mice_all(i).days(~putty_flags) = [];
 end 
+
 
 % Was PUTTY used for the recording? 
 parameters.putty_flag = false;
@@ -201,8 +214,8 @@ parameters.load_abort_flag = true;
 parameters.removeEmptyIterations = false;  
 
 % Reset mice_all (because you're changing it for the Putty only stacks)
-parameters.mice_all = mice_all; 
-parameters.mice_all = parameters.mice_all(1);
+% parameters.mice_all = mice_all; 
+% parameters.mice_all = parameters.mice_all(1);
 
 % Iterators
 parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
@@ -217,7 +230,7 @@ parameters.location_putty_flag = {'parameters.mice_all(', 'mouse_iterator', ').d
 parameters.location_accel_flag = {'parameters.mice_all(', 'mouse_iterator', ').days(', 'day_iterator', ').number_accels_used'};
 
 % Input
-parameters.loop_list.things_to_load.trial.dir = {[parameters.dir_exper_original 'behavior\motorized\extracted motor data\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.trial.dir = {[parameters.dir_exper 'behavior\motorized\extracted motor data\'], 'mouse', '\', 'day', '\'};
 parameters.loop_list.things_to_load.trial.filename= {'trial', 'stack', '.mat'};
 parameters.loop_list.things_to_load.trial.variable= {'trial'}; 
 parameters.loop_list.things_to_load.trial.level = 'stack';
