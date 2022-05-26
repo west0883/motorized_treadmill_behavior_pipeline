@@ -4,7 +4,10 @@
 %% Parameters for directories
 clear all;
 
-experiment_name='Random Motorized Treadmill';
+% Time for continued time chunks, in seconds.
+continued_chunk_length = 3;
+
+experiment_name=['Random Motorized Treadmill\' num2str(continued_chunk_length) 's continued'];
 
 dir_base='Y:\Sarah\Analysis\Experiments\';
 dir_exper=[dir_base experiment_name '\']; 
@@ -16,8 +19,6 @@ mkdir(dir_out);
 % done in.
 fps = 20; 
 
-% Time for continued time chunks, in seconds.
-continued_chunk_length = 1;
 
 % Time for finished xyz chunkcs, in seconds
 finished_chunk_length = 3; 
@@ -119,183 +120,183 @@ save([dir_out 'Behavior_Conditions.mat'], 'Conditions');
 
 %% FROM BEFORE RUNANALYSIS IMPLEMENTATION
 % Create a periods structure
-speeds = [1600, 2000, 2400, 2800]; 
-accels_startstop = [400, 800];
-accels_acceldecel = [200, 800]; 
-
-periods = cell(1,1); 
-for condi =1:size(Conditions,2)
-    short_name = Conditions(condi).short;
-
-    % Only make fields for things we actually care about
-    % per condition type
-
-    switch condi
-
-        % For all but start & maintaining warning cues, the two 
-        % motor maintaining types, the continued walking
-        % types, and the no change in motor probe,we only 
-        % care about the current speed subdivisions
-        case num2cell([9:11 19:21 26])
-
-            % Initialize empty fields 
-            for speedi = 1: size (speeds,2)
-                new_name = {[short_name '.x' num2str(speeds(speedi))]};
-                periods =[periods; new_name];
-            end 
-
-        % For accel, decel, we care about the
-        % previous speed, current speed, and acceleration
-        
-        % For accel and probe accel, previous speed has to be lower than
-        % current speed 
-        case num2cell([1,14])
-
-            % Initialize empty fields 
-            for speedi = 1: size (speeds,2)
-                speed =speeds(speedi);
-                for acceli = 1:size(accels_acceldecel,2)
-                    accel =accels_acceldecel(acceli);
-
-                    for speed2i = 1: (speedi-1)
-                        speed2 =speeds(speed2i);
-                        
-                        if speed ~=speed2
-                            new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
-                            periods =[periods; new_name];
-                        end 
-                    end 
-                end 
-            end
-            
-            % For decel and probe decel, previous speed has to be higher than
-            % current speed 
-            
-            case num2cell([2,15])
-
-                % Initialize empty fields 
-                for speedi = 1: size (speeds,2)
-                    speed =speeds(speedi);
-                    for acceli = 1:size(accels_acceldecel,2)
-                        accel =accels_acceldecel(acceli);
-
-                        for speed2i = speedi + 1 : size(speeds,2)
-                            speed2 =speeds(speed2i);
-
-                            if speed ~=speed2
-                                new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
-                                periods =[periods; new_name];
-                            end 
-                        end 
-                    end 
-                end
-
-        % For finished accel & finished decel, we care about 
-        % current speed, 2 speeds ago, and acceleration.
-        
-        % faccel 's second speed can't be higher than first
-        case num2cell([6])   
-            % Initialize empty fields 
-            for speedi = 1: size (speeds,2)
-                speed =speeds(speedi);
-                for acceli = 1:size(accels_acceldecel,2)
-                    accel =accels_acceldecel(acceli);
-
-                    for speed2i = 1:speedi-1
-                        speed2 =speeds(speed2i);
-                        
-                        if speed ~=speed2
-                            new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
-                            periods =[periods; new_name];
-                        end
-                    end 
-                end 
-            end
-            
-        % fdecel 's second speed can't be lower than first
-        case num2cell(7)   
-            % Initialize empty fields 
-            for speedi = 1: size (speeds,2)
-                speed =speeds(speedi);
-                for acceli = 1:size(accels_acceldecel,2)
-                    accel =accels_acceldecel(acceli);
-
-                    for speed2i = speedi+1:size(speeds,2)
-                        speed2 =speeds(speed2i);
-                        
-                        if speed ~=speed2
-                            new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
-                            periods =[periods; new_name];
-                        end
-                    end 
-                end 
-            end    
-
-        % For start, no warning start, & finished start, care only about current speed and accel
-        case num2cell([24, 25, 28])
-            % Initialize empty fields 
-            for speedi = 1: size (speeds,2)
-                speed =speeds(speedi);
-                for acceli = 1:size(accels_startstop, 2)
-                    accel =accels_startstop(acceli);
-                    new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel)]};
-                    periods =[periods; new_name];
-
-                end 
-            end
-
-        % For stop & no warning stop, care only about
-        % previous speed and accel.
-        case num2cell([4, 16])
-            % Initialize empty fields 
-            all_speeds = [speeds];
-            for speedi = 1: size (all_speeds,2)
-                speed = all_speeds(speedi);
-                for acceli = 1:size(accels_startstop,2)
-                    accel =accels_startstop(acceli);
-                    new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel)]};
-                    periods =[periods; new_name];
-                end 
-            end
-
-        % For finished stop, care only about 2 speeds ago
-        % and accel. 
-        case 5 
-            % Initialize empty fields
-            all_speeds = [ speeds];
-            for speedi = 1: size (all_speeds,2)
-                speed = all_speeds(speedi);
-                for acceli = 1:size(accels_startstop, 2)
-                    accel =accels_startstop(acceli);
-                    new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel)]};
-                    periods =[periods; new_name];
-                end 
-            end
-
-        % For warning start, warning start probe, and continued rest don't
-        % care about anything
-        case num2cell([8,18, 27])
-            periods =[ periods; {short_name}];
-
-        % Motor maintaining, warning maintaining, probe warning maintaining,and motor no change
-        % care about all speeds, including 0; and no
-        % warning
-        case num2cell([3,12,13,17,22, 23])   
-
-            all_speeds = [0 speeds];
-            % add names
-            for speedi = 1: size (all_speeds,2)
-                new_name = {[short_name '.x' num2str(all_speeds(speedi))]};
-                periods =[periods; new_name];
-            end 
-
-    end
-end
-% Remove the empty first entry
-periods = periods(2:end);
-
-% Save
-save([dir_out 'periods_namestructure.mat'], 'periods');
+% speeds = [1600, 2000, 2400, 2800]; 
+% accels_startstop = [400, 800];
+% accels_acceldecel = [200, 800]; 
+% 
+% periods = cell(1,1); 
+% for condi =1:size(Conditions,2)
+%     short_name = Conditions(condi).short;
+% 
+%     % Only make fields for things we actually care about
+%     % per condition type
+% 
+%     switch condi
+% 
+%         % For all but start & maintaining warning cues, the two 
+%         % motor maintaining types, the continued walking
+%         % types, and the no change in motor probe,we only 
+%         % care about the current speed subdivisions
+%         case num2cell([9:11 19:21 26])
+% 
+%             % Initialize empty fields 
+%             for speedi = 1: size (speeds,2)
+%                 new_name = {[short_name '.x' num2str(speeds(speedi))]};
+%                 periods =[periods; new_name];
+%             end 
+% 
+%         % For accel, decel, we care about the
+%         % previous speed, current speed, and acceleration
+%         
+%         % For accel and probe accel, previous speed has to be lower than
+%         % current speed 
+%         case num2cell([1,14])
+% 
+%             % Initialize empty fields 
+%             for speedi = 1: size (speeds,2)
+%                 speed =speeds(speedi);
+%                 for acceli = 1:size(accels_acceldecel,2)
+%                     accel =accels_acceldecel(acceli);
+% 
+%                     for speed2i = 1: (speedi-1)
+%                         speed2 =speeds(speed2i);
+%                         
+%                         if speed ~=speed2
+%                             new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
+%                             periods =[periods; new_name];
+%                         end 
+%                     end 
+%                 end 
+%             end
+%             
+%             % For decel and probe decel, previous speed has to be higher than
+%             % current speed 
+%             
+%             case num2cell([2,15])
+% 
+%                 % Initialize empty fields 
+%                 for speedi = 1: size (speeds,2)
+%                     speed =speeds(speedi);
+%                     for acceli = 1:size(accels_acceldecel,2)
+%                         accel =accels_acceldecel(acceli);
+% 
+%                         for speed2i = speedi + 1 : size(speeds,2)
+%                             speed2 =speeds(speed2i);
+% 
+%                             if speed ~=speed2
+%                                 new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
+%                                 periods =[periods; new_name];
+%                             end 
+%                         end 
+%                     end 
+%                 end
+% 
+%         % For finished accel & finished decel, we care about 
+%         % current speed, 2 speeds ago, and acceleration.
+%         
+%         % faccel 's second speed can't be higher than first
+%         case num2cell([6])   
+%             % Initialize empty fields 
+%             for speedi = 1: size (speeds,2)
+%                 speed =speeds(speedi);
+%                 for acceli = 1:size(accels_acceldecel,2)
+%                     accel =accels_acceldecel(acceli);
+% 
+%                     for speed2i = 1:speedi-1
+%                         speed2 =speeds(speed2i);
+%                         
+%                         if speed ~=speed2
+%                             new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
+%                             periods =[periods; new_name];
+%                         end
+%                     end 
+%                 end 
+%             end
+%             
+%         % fdecel 's second speed can't be lower than first
+%         case num2cell(7)   
+%             % Initialize empty fields 
+%             for speedi = 1: size (speeds,2)
+%                 speed =speeds(speedi);
+%                 for acceli = 1:size(accels_acceldecel,2)
+%                     accel =accels_acceldecel(acceli);
+% 
+%                     for speed2i = speedi+1:size(speeds,2)
+%                         speed2 =speeds(speed2i);
+%                         
+%                         if speed ~=speed2
+%                             new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
+%                             periods =[periods; new_name];
+%                         end
+%                     end 
+%                 end 
+%             end    
+% 
+%         % For start, no warning start, & finished start, care only about current speed and accel
+%         case num2cell([24, 25, 28])
+%             % Initialize empty fields 
+%             for speedi = 1: size (speeds,2)
+%                 speed =speeds(speedi);
+%                 for acceli = 1:size(accels_startstop, 2)
+%                     accel =accels_startstop(acceli);
+%                     new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel)]};
+%                     periods =[periods; new_name];
+% 
+%                 end 
+%             end
+% 
+%         % For stop & no warning stop, care only about
+%         % previous speed and accel.
+%         case num2cell([4, 16])
+%             % Initialize empty fields 
+%             all_speeds = [speeds];
+%             for speedi = 1: size (all_speeds,2)
+%                 speed = all_speeds(speedi);
+%                 for acceli = 1:size(accels_startstop,2)
+%                     accel =accels_startstop(acceli);
+%                     new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel)]};
+%                     periods =[periods; new_name];
+%                 end 
+%             end
+% 
+%         % For finished stop, care only about 2 speeds ago
+%         % and accel. 
+%         case 5 
+%             % Initialize empty fields
+%             all_speeds = [ speeds];
+%             for speedi = 1: size (all_speeds,2)
+%                 speed = all_speeds(speedi);
+%                 for acceli = 1:size(accels_startstop, 2)
+%                     accel =accels_startstop(acceli);
+%                     new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel)]};
+%                     periods =[periods; new_name];
+%                 end 
+%             end
+% 
+%         % For warning start, warning start probe, and continued rest don't
+%         % care about anything
+%         case num2cell([8,18, 27])
+%             periods =[ periods; {short_name}];
+% 
+%         % Motor maintaining, warning maintaining, probe warning maintaining,and motor no change
+%         % care about all speeds, including 0; and no
+%         % warning
+%         case num2cell([3,12,13,17,22, 23])   
+% 
+%             all_speeds = [0 speeds];
+%             % add names
+%             for speedi = 1: size (all_speeds,2)
+%                 new_name = {[short_name '.x' num2str(all_speeds(speedi))]};
+%                 periods =[periods; new_name];
+%             end 
+% 
+%     end
+% end
+% % Remove the empty first entry
+% periods = periods(2:end);
+% 
+% % Save
+% save([dir_out 'periods_namestructure.mat'], 'periods');
 
 
 %% Make an iterations structure for each period type. 
@@ -409,8 +410,8 @@ loop_list.iterators = {
                };
 
  loop_variables.periods = periods; 
-% 
- %looping_output_list = LoopGenerator(loop_list, loop_variables);
+
+ looping_output_list = LoopGenerator(loop_list, loop_variables);
 
 holder = NaN(size(looping_output_list,1), size(loop_list.iterators,1));
 for iteratori = 1:size(loop_list.iterators,1)
@@ -527,190 +528,188 @@ save([dir_out 'periods_nametable.mat'], 'periods');
 % g = periods_table(string(periods_table.condition)=="m_accel" & string(periods_table.speed)=="2000", :);
 %% Create structure of groupings of periods that are similar.--For timeseries of different durations
 
-clear all;
+% clear all;
 
-% Directories
-experiment_name='Random Motorized Treadmill';
-dir_base='Y:\Sarah\Analysis\Experiments\';
-dir_exper=[dir_base experiment_name '\']; 
-dir_out=dir_exper; 
-mkdir(dir_out);
-
-% Possible speeds and accels. 
-speeds = [1600, 2000, 2400, 2800]; 
-accels_startstop = [400, 800];
-accels_acceldecel = [200, 800]; 
-
-periods_grouped_varyingduration = cell(1,1);
-
-% Accelerations -- same magnitude, accel 
-
-% For each possible acceleration.
-for acceli = 1:numel(accels_acceldecel) 
-    accel = accels_acceldecel(acceli);
-    
-    % For each possible magnitude
-    for magi = 1:numel(speeds)-1
-    
-        % Find the magnitude of the change.
-        magnitude = magi * 400;
-   
-        new_name = {[ 'm_accel.x' num2str(accel) '.' num2str(magnitude)]};
-           
-        periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
-        
-    end
-end 
-
-% Decelerations -- same magnitude, accel
-
-% For each possible acceleration.
-for acceli = 1:numel(accels_acceldecel) 
-    accel = accels_acceldecel(acceli);
-    
-    % For each possible magnitude
-    for magi = 1:numel(speeds)-1
-    
-        % Find the magnitude of the change.
-        magnitude = magi * 400;
-   
-        new_name = {[ 'm_decel.x' num2str(accel) '.' num2str(magnitude)]};
-           
-        periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
-        
-    end
-end 
-
-% Starts
-
-% Stops
-
-% Finish of accels, same accel
-for acceli = 1:numel(accels_acceldecel) 
-    accel = accels_acceldecel(acceli);
-
-    new_name = {[ 'm_faccel.x' num2str(accel)]};
-    periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
-end 
-
-% Finish of decels, same accel
-for acceli = 1:numel(accels_acceldecel) 
-    accel = accels_acceldecel(acceli);
-   
-    new_name = {[ 'm_fdecel.x' num2str(accel)]};
-    periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
-end 
-
-% Finish of starts, same accels, all speeds
-for acceli = 1:numel(accels_startstop) 
-    accel = accels_acceldecel(acceli);
-   
-    new_name = {[ 'm_fstart.x' num2str(accel)]};
-    periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];   
-end 
-
-% Finish of stops, same accels, all speeds.
-for acceli = 1:numel(accels_startstop) 
-    accel = accels_acceldecel(acceli);
-    new_name = {[ 'm_fstop.x' num2str(accel)]};
-    periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
-end 
-
-% Maintaining -- rest and all speeds.
-periods_grouped_varyingduration = [periods_grouped_varyingduration; 'm_maint.rest'];
-periods_grouped_varyingduration = [periods_grouped_varyingduration; 'm_maint.walk'];
-
-% Warning of accels -- all speeds
-periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_accel'];
-
-% Warning of decels -- all speeds
-periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_decel'];
-
-% Warning of stops -- all speeds
-periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_stop'];
-
-% Warning of maintaining -- rest and all speeds
-periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_maint.rest'];
-periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_maint.walk'];
-
-% All continued walk (all speeds)
-periods_grouped_varyingduration = [periods_grouped_varyingduration; 'c_walk'];
-
-% Continued rest. 
-periods_grouped_varyingduration = [periods_grouped_varyingduration; 'c_rest'];
-
-% Probes.
-
-% Save
+% % Directories
+% experiment_name='Random Motorized Treadmill';
+% dir_base='Y:\Sarah\Analysis\Experiments\';
+% dir_exper=[dir_base experiment_name '\']; 
+% dir_out=dir_exper; 
+% mkdir(dir_out);
+% 
+% % Possible speeds and accels. 
+% speeds = [1600, 2000, 2400, 2800]; 
+% accels_startstop = [400, 800];
+% accels_acceldecel = [200, 800]; 
+% 
+% periods_grouped_varyingduration = cell(1,1);
+% 
+% % Accelerations -- same magnitude, accel 
+% 
+% % For each possible acceleration.
+% for acceli = 1:numel(accels_acceldecel) 
+%     accel = accels_acceldecel(acceli);
+%     
+%     % For each possible magnitude
+%     for magi = 1:numel(speeds)-1
+%     
+%         % Find the magnitude of the change.
+%         magnitude = magi * 400;
+%    
+%         new_name = {[ 'm_accel.x' num2str(accel) '.' num2str(magnitude)]};
+%            
+%         periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
+%         
+%     end
+% end 
+% 
+% % Decelerations -- same magnitude, accel
+% 
+% % For each possible acceleration.
+% for acceli = 1:numel(accels_acceldecel) 
+%     accel = accels_acceldecel(acceli);
+%     
+%     % For each possible magnitude
+%     for magi = 1:numel(speeds)-1
+%     
+%         % Find the magnitude of the change.
+%         magnitude = magi * 400;
+%    
+%         new_name = {[ 'm_decel.x' num2str(accel) '.' num2str(magnitude)]};
+%            
+%         periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
+%         
+%     end
+% end 
+% 
+% % Starts
+% 
+% % Stops
+% 
+% % Finish of accels, same accel
+% for acceli = 1:numel(accels_acceldecel) 
+%     accel = accels_acceldecel(acceli);
+% 
+%     new_name = {[ 'm_faccel.x' num2str(accel)]};
+%     periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
+% end 
+% 
+% % Finish of decels, same accel
+% for acceli = 1:numel(accels_acceldecel) 
+%     accel = accels_acceldecel(acceli);
+%    
+%     new_name = {[ 'm_fdecel.x' num2str(accel)]};
+%     periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
+% end 
+% 
+% % Finish of starts, same accels, all speeds
+% for acceli = 1:numel(accels_startstop) 
+%     accel = accels_acceldecel(acceli);
+%    
+%     new_name = {[ 'm_fstart.x' num2str(accel)]};
+%     periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];   
+% end 
+% 
+% % Finish of stops, same accels, all speeds.
+% for acceli = 1:numel(accels_startstop) 
+%     accel = accels_acceldecel(acceli);
+%     new_name = {[ 'm_fstop.x' num2str(accel)]};
+%     periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
+% end 
+% 
+% % Maintaining -- rest and all speeds.
+% periods_grouped_varyingduration = [periods_grouped_varyingduration; 'm_maint.rest'];
+% periods_grouped_varyingduration = [periods_grouped_varyingduration; 'm_maint.walk'];
+% 
+% % Warning of accels -- all speeds
+% periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_accel'];
+% 
+% % Warning of decels -- all speeds
+% periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_decel'];
+% 
+% % Warning of stops -- all speeds
+% periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_stop'];
+% 
+% % Warning of maintaining -- rest and all speeds
+% periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_maint.rest'];
+% periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_maint.walk'];
+% 
+% % All continued walk (all speeds)
+% periods_grouped_varyingduration = [periods_grouped_varyingduration; 'c_walk'];
+% 
+% % Continued rest. 
+% periods_grouped_varyingduration = [periods_grouped_varyingduration; 'c_rest'];
+% 
+% % Probes.
+% 
+% % Save
 
 %% Create structure of groupings of periods that are similar.--For summary correlations or other across-duration summarys
 
-clear all;
-
-% Directories
-experiment_name='Random Motorized Treadmill';
-dir_base='Y:\Sarah\Analysis\Experiments\';
-dir_exper=[dir_base experiment_name '\']; 
-dir_out=dir_exper; 
-mkdir(dir_out);
-
-% Possible speeds and accels. 
-speeds = [1600, 2000, 2400, 2800]; 
-accels_startstop = [400, 800];
-accels_acceldecel = [200, 800]; 
-
-% Initialize
-periods_grouped_allduration = cell(1,1);
-
-% Accelerations
-% For each possible acceleration .
-periods_grouped_allduration = [periods_grouped_allduration; 'm_accel'];
-
-% Decelerations 
-periods_grouped_allduration = [periods_grouped_allduration; 'm_decel'];
-
-% Starts
-periods_grouped_allduration = [periods_grouped_allduration; 'm_start'];
-
-% Stops
-periods_grouped_allduration = [periods_grouped_allduration; 'm_stop'];
-
-% Finish of accel
-periods_grouped_allduration = [periods_grouped_allduration; 'm_faccel'];
-
-% Finish of decels
-periods_grouped_allduration = [periods_grouped_allduration; 'm_faccel'];
-
-% Finish of starts.
-periods_grouped_allduration = [periods_grouped_allduration; 'm_fstart'];
-
-% Finish of stops 
-periods_grouped_allduration = [periods_grouped_allduration; 'm_fstop'];
-
-% Maintaining -- rest and all speeds.
-periods_grouped_allduration = [periods_grouped_allduration; 'm_maint.rest'];
-periods_grouped_allduration = [periods_grouped_allduration; 'm_maint.walk'];
-
-% Warning of accels
-periods_grouped_allduration = [periods_grouped_allduration; 'w_accel'];
-
-% Warning of decels
-periods_grouped_allduration = [periods_grouped_allduration; 'w_decel'];
-
-% Warning of stops
-periods_grouped_allduration = [periods_grouped_allduration; 'w_stop'];
-
-% Warning of maintaining 
-periods_grouped_allduration = [periods_grouped_allduration; 'w_maint.rest'];
-periods_grouped_allduration = [periods_grouped_allduration; 'w_maint.walk'];
-
-% All continued walk (all speeds)
-periods_grouped_allduration = [periods_grouped_allduration; 'c_walk'];
-
-% Continued rest. 
-periods_grouped_allduration = [periods_grouped_allduration; 'c_rest'];
-
-% Probes.
-
-% Save
-save([dir_out 'periods_grouped_allduration.mat'], 'periods_grouped_allduration');
+%clear all;
+% 
+% % Directories
+% dir_exper=[dir_base experiment_name '\']; 
+% dir_out=dir_exper; 
+% mkdir(dir_out);
+% 
+% % Possible speeds and accels. 
+% speeds = [1600, 2000, 2400, 2800]; 
+% accels_startstop = [400, 800];
+% accels_acceldecel = [200, 800]; 
+% 
+% % Initialize
+% periods_grouped_allduration = cell(1,1);
+% 
+% % Accelerations
+% % For each possible acceleration .
+% periods_grouped_allduration = [periods_grouped_allduration; 'm_accel'];
+% 
+% % Decelerations 
+% periods_grouped_allduration = [periods_grouped_allduration; 'm_decel'];
+% 
+% % Starts
+% periods_grouped_allduration = [periods_grouped_allduration; 'm_start'];
+% 
+% % Stops
+% periods_grouped_allduration = [periods_grouped_allduration; 'm_stop'];
+% 
+% % Finish of accel
+% periods_grouped_allduration = [periods_grouped_allduration; 'm_faccel'];
+% 
+% % Finish of decels
+% periods_grouped_allduration = [periods_grouped_allduration; 'm_faccel'];
+% 
+% % Finish of starts.
+% periods_grouped_allduration = [periods_grouped_allduration; 'm_fstart'];
+% 
+% % Finish of stops 
+% periods_grouped_allduration = [periods_grouped_allduration; 'm_fstop'];
+% 
+% % Maintaining -- rest and all speeds.
+% periods_grouped_allduration = [periods_grouped_allduration; 'm_maint.rest'];
+% periods_grouped_allduration = [periods_grouped_allduration; 'm_maint.walk'];
+% 
+% % Warning of accels
+% periods_grouped_allduration = [periods_grouped_allduration; 'w_accel'];
+% 
+% % Warning of decels
+% periods_grouped_allduration = [periods_grouped_allduration; 'w_decel'];
+% 
+% % Warning of stops
+% periods_grouped_allduration = [periods_grouped_allduration; 'w_stop'];
+% 
+% % Warning of maintaining 
+% periods_grouped_allduration = [periods_grouped_allduration; 'w_maint.rest'];
+% periods_grouped_allduration = [periods_grouped_allduration; 'w_maint.walk'];
+% 
+% % All continued walk (all speeds)
+% periods_grouped_allduration = [periods_grouped_allduration; 'c_walk'];
+% 
+% % Continued rest. 
+% periods_grouped_allduration = [periods_grouped_allduration; 'c_rest'];
+% 
+% % Probes.
+% 
+% % Save
+% save([dir_out 'periods_grouped_allduration.mat'], 'periods_grouped_allduration');
