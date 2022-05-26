@@ -30,13 +30,22 @@
 %  *  22 = Warning cue: probe, maintaining cue, no change in motor.
 %  *  23 = Motor probe: no change.
 
+
 function [] = findBehaviorPeriods(trial, possible_speeds)
     % Trial is a n x 4 cell created by extractMotorData.m
    
+    % Load list of behavior periods.
+    load([dir_exper 'Behavior_Conditions.mat']); 
+    
     % Find the start of the trial by finding the string 'Starting Mouse
     % Runner' in the first colomn. 
     start_point = find(strcmp(trial(:,1), 'Starting Mouse Runner'));
   
+    % Initialize empty behavior condition variables.
+    for i = 1:size(Conditions,2)
+        eval([Conditions(1).short ' = [];']);  
+    end
+    
     % Go through every entry after the start point, not including the last
     % 'Done' entry.
     for i = start_point + 1 : size(trial,1) - 1
@@ -77,18 +86,22 @@ function [] = findBehaviorPeriods(trial, possible_speeds)
                     
                     case 0
                        
-                        starting 
+                        % Starting 
+                        
                     
+                    otherwise 
+                        
+                        % Accelerating
                         
                 end
                 
-            case 2 % motor decelerating
+            case 2 % Motor decelerating
                 
-            case 3
+            case 3 % Motor maintaining
                 
-            case 4
+            case 4 % Motor stopping
                 
-            case 5
+            case 5 % Motor finished stopping 
 
             case 6
                 
