@@ -104,14 +104,198 @@ Conditions(28).short = 'm_p_nowarn_start';
 
 save([dir_out 'Behavior_Conditions.mat'], 'Conditions');
 
-%%
+%% FROM BEFORE RUNANALYSIS IMPLEMENTATION
+% % Create a periods structure
+% speeds = [1600, 2000, 2400, 2800]; 
+% accels_startstop = [400, 800];
+% accels_acceldecel = [200, 800]; 
+% 
+% periods = cell(1,1); 
+% for condi =1:size(Conditions,2)
+%     short_name = Conditions(condi).short;
+% 
+%     % Only make fields for things we actually care about
+%     % per condition type
+% 
+%     switch condi
+% 
+%         % For all but start & maintaining warning cues, the two 
+%         % motor maintaining types, the continued walking
+%         % types, and the no change in motor probe,we only 
+%         % care about the current speed subdivisions
+%         case num2cell([9:11 19:21 26])
+% 
+%             % Initialize empty fields 
+%             for speedi = 1: size (speeds,2)
+%                 new_name = {[short_name '.x' num2str(speeds(speedi))]};
+%                 periods =[periods; new_name];
+%             end 
+% 
+%         % For accel, decel, we care about the
+%         % previous speed, current speed, and acceleration
+%         
+%         % For accel and probe accel, previous speed has to be lower than
+%         % current speed 
+%         case num2cell([1,14])
+% 
+%             % Initialize empty fields 
+%             for speedi = 1: size (speeds,2)
+%                 speed =speeds(speedi);
+%                 for acceli = 1:size(accels_acceldecel,2)
+%                     accel =accels_acceldecel(acceli);
+% 
+%                     for speed2i = 1: (speedi-1)
+%                         speed2 =speeds(speed2i);
+%                         
+%                         if speed ~=speed2
+%                             new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
+%                             periods =[periods; new_name];
+%                         end 
+%                     end 
+%                 end 
+%             end
+%             
+%             % For decel and probe decel, previous speed has to be higher than
+%             % current speed 
+%             
+%             case num2cell([2,15])
+% 
+%                 % Initialize empty fields 
+%                 for speedi = 1: size (speeds,2)
+%                     speed =speeds(speedi);
+%                     for acceli = 1:size(accels_acceldecel,2)
+%                         accel =accels_acceldecel(acceli);
+% 
+%                         for speed2i = speedi + 1 : size(speeds,2)
+%                             speed2 =speeds(speed2i);
+% 
+%                             if speed ~=speed2
+%                                 new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
+%                                 periods =[periods; new_name];
+%                             end 
+%                         end 
+%                     end 
+%                 end
+% 
+%         % For finished accel & finished decel, we care about 
+%         % current speed, 2 speeds ago, and acceleration.
+%         
+%         % faccel 's second speed can't be higher than first
+%         case num2cell([6])   
+%             % Initialize empty fields 
+%             for speedi = 1: size (speeds,2)
+%                 speed =speeds(speedi);
+%                 for acceli = 1:size(accels_acceldecel,2)
+%                     accel =accels_acceldecel(acceli);
+% 
+%                     for speed2i = 1:speedi-1
+%                         speed2 =speeds(speed2i);
+%                         
+%                         if speed ~=speed2
+%                             new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
+%                             periods =[periods; new_name];
+%                         end
+%                     end 
+%                 end 
+%             end
+%             
+%         % fdecel 's second speed can't be lower than first
+%         case num2cell(7)   
+%             % Initialize empty fields 
+%             for speedi = 1: size (speeds,2)
+%                 speed =speeds(speedi);
+%                 for acceli = 1:size(accels_acceldecel,2)
+%                     accel =accels_acceldecel(acceli);
+% 
+%                     for speed2i = speedi+1:size(speeds,2)
+%                         speed2 =speeds(speed2i);
+%                         
+%                         if speed ~=speed2
+%                             new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
+%                             periods =[periods; new_name];
+%                         end
+%                     end 
+%                 end 
+%             end    
+% 
+%         % For start, no warning start, & finished start, care only about current speed and accel
+%         case num2cell([24, 25, 28])
+%             % Initialize empty fields 
+%             for speedi = 1: size (speeds,2)
+%                 speed =speeds(speedi);
+%                 for acceli = 1:size(accels_startstop, 2)
+%                     accel =accels_startstop(acceli);
+%                     new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel)]};
+%                     periods =[periods; new_name];
+% 
+%                 end 
+%             end
+% 
+%         % For stop & no warning stop, care only about
+%         % previous speed and accel.
+%         case num2cell([4, 16])
+%             % Initialize empty fields 
+%             all_speeds = [speeds];
+%             for speedi = 1: size (all_speeds,2)
+%                 speed = all_speeds(speedi);
+%                 for acceli = 1:size(accels_startstop,2)
+%                     accel =accels_startstop(acceli);
+%                     new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel)]};
+%                     periods =[periods; new_name];
+%                 end 
+%             end
+% 
+%         % For finished stop, care only about 2 speeds ago
+%         % and accel. 
+%         case 5 
+%             % Initialize empty fields
+%             all_speeds = [ speeds];
+%             for speedi = 1: size (all_speeds,2)
+%                 speed = all_speeds(speedi);
+%                 for acceli = 1:size(accels_startstop, 2)
+%                     accel =accels_startstop(acceli);
+%                     new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel)]};
+%                     periods =[periods; new_name];
+%                 end 
+%             end
+% 
+%         % For warning start, warning start probe, and continued rest don't
+%         % care about anything
+%         case num2cell([8,18, 27])
+%             periods =[ periods; {short_name}];
+% 
+%         % Motor maintaining, warning maintaining, probe warning maintaining,and motor no change
+%         % care about all speeds, including 0; and no
+%         % warning
+%         case num2cell([3,12,13,17,22, 23])   
+% 
+%             all_speeds = [0 speeds];
+%             % add names
+%             for speedi = 1: size (all_speeds,2)
+%                 new_name = {[short_name '.x' num2str(all_speeds(speedi))]};
+%                 periods =[periods; new_name];
+%             end 
+% 
+%     end
+% end
+% % Remove the empty first entry
+% periods = periods(2:end);
+% 
+% % Save
+% save([dir_out 'periods.mat'], 'periods');
+
+
+%% Make an iterations structure for each period type. 
 % Create a periods structure
-speeds = [1600, 2000, 2400, 2800]; 
+speeds = [0, 1600, 2000, 2400, 2800]; 
 accels_startstop = [400, 800];
 accels_acceldecel = [200, 800]; 
 
-periods = cell(1,1); 
+% Load conditions structure.
+load([dir_exper 'Behavior_Conditions.mat']);
+ 
 for condi =1:size(Conditions,2)
+
     short_name = Conditions(condi).short;
 
     % Only make fields for things we actually care about
@@ -121,168 +305,79 @@ for condi =1:size(Conditions,2)
 
         % For all but start & maintaining warning cues, the two 
         % motor maintaining types, the continued walking
-        % types, and the no change in motor probe,we only 
-        % care about the current speed subdivisions
-        case num2cell([9:11 19:21 26])
+        % types, and the no change in motor probe,we only care about the 
+        % current speed subdivisions.  Motor maintaining, warning maintaining, probe warning maintaining,and motor no change
+        % care about speeds, including 0; and no warning
+        case num2cell([9:11 19:21 26 3,12,13,17,22, 23])
+             
+             periods(condi).current_speed = speeds;
+             periods(condi).current_accel = NaN; 
+             periods(condi).previous_speed = NaN;
+             periods(condi).previous_accel = NaN; 
+             periods(condi).two_speeds_ago = NaN; 
 
-            % Initialize empty fields 
-            for speedi = 1: size (speeds,2)
-                new_name = {[short_name '.x' num2str(speeds(speedi))]};
-                periods =[periods; new_name];
-            end 
-
-        % For accel, decel, we care about the
+        % For accel, decel, & corresponding proves, we care about the
         % previous speed, current speed, and acceleration
-        
-        % For accel and probe accel, previous speed has to be lower than
-        % current speed 
-        case num2cell([1,14])
-
-            % Initialize empty fields 
-            for speedi = 1: size (speeds,2)
-                speed =speeds(speedi);
-                for acceli = 1:size(accels_acceldecel,2)
-                    accel =accels_acceldecel(acceli);
-
-                    for speed2i = 1: (speedi-1)
-                        speed2 =speeds(speed2i);
-                        
-                        if speed ~=speed2
-                            new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
-                            periods =[periods; new_name];
-                        end 
-                    end 
-                end 
-            end
+        case num2cell([1, 2, 14, 15])
             
-            % For decel and probe decel, previous speed has to be higher than
-            % current speed 
+            periods(condi).current_speed = speeds;
+            periods(condi).current_accel = accels_acceldecel; 
+            periods(condi).previous_speed = speeds;
+            periods(condi).previous_accel = NaN; 
+            periods(condi).two_speeds_ago = NaN; 
             
-            case num2cell([2,15])
-
-                % Initialize empty fields 
-                for speedi = 1: size (speeds,2)
-                    speed =speeds(speedi);
-                    for acceli = 1:size(accels_acceldecel,2)
-                        accel =accels_acceldecel(acceli);
-
-                        for speed2i = speedi + 1 : size(speeds,2)
-                            speed2 =speeds(speed2i);
-
-                            if speed ~=speed2
-                                new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
-                                periods =[periods; new_name];
-                            end 
-                        end 
-                    end 
-                end
 
         % For finished accel & finished decel, we care about 
         % current speed, 2 speeds ago, and acceleration.
-        
-        % faccel 's second speed can't be higher than first
-        case num2cell([6])   
-            % Initialize empty fields 
-            for speedi = 1: size (speeds,2)
-                speed =speeds(speedi);
-                for acceli = 1:size(accels_acceldecel,2)
-                    accel =accels_acceldecel(acceli);
-
-                    for speed2i = 1:speedi-1
-                        speed2 =speeds(speed2i);
-                        
-                        if speed ~=speed2
-                            new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
-                            periods =[periods; new_name];
-                        end
-                    end 
-                end 
-            end
-            
-        % fdecel 's second speed can't be lower than first
-        case num2cell(7)   
-            % Initialize empty fields 
-            for speedi = 1: size (speeds,2)
-                speed =speeds(speedi);
-                for acceli = 1:size(accels_acceldecel,2)
-                    accel =accels_acceldecel(acceli);
-
-                    for speed2i = speedi+1:size(speeds,2)
-                        speed2 =speeds(speed2i);
-                        
-                        if speed ~=speed2
-                            new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)]};
-                            periods =[periods; new_name];
-                        end
-                    end 
-                end 
-            end    
+        case num2cell([6, 7]) 
+            periods(condi).current_speed = speeds;
+            periods(condi).current_accel = accels_acceldecel; 
+            periods(condi).previous_speed = NaN;
+            periods(condi).previous_accel = NaN; 
+            periods(condi).two_speeds_ago = speeds; 
 
         % For start, no warning start, & finished start, care only about current speed and accel
         case num2cell([24, 25, 28])
-            % Initialize empty fields 
-            for speedi = 1: size (speeds,2)
-                speed =speeds(speedi);
-                for acceli = 1:size(accels_startstop, 2)
-                    accel =accels_startstop(acceli);
-                    new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel)]};
-                    periods =[periods; new_name];
-
-                end 
-            end
+            periods(condi).current_speed = speeds;
+            periods(condi).current_accel = accels_startstop; 
+            periods(condi).previous_speed = NaN;
+            periods(condi).previous_accel = NaN; 
+            periods(condi).two_speeds_ago = NaN; 
 
         % For stop & no warning stop, care only about
         % previous speed and accel.
         case num2cell([4, 16])
-            % Initialize empty fields 
-            all_speeds = [speeds];
-            for speedi = 1: size (all_speeds,2)
-                speed = all_speeds(speedi);
-                for acceli = 1:size(accels_startstop,2)
-                    accel =accels_startstop(acceli);
-                    new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel)]};
-                    periods =[periods; new_name];
-                end 
-            end
+            periods(condi).current_speed = NaN;
+            periods(condi).current_accel = accels_startstop; 
+            periods(condi).previous_speed = speeds;
+            periods(condi).previous_accel = NaN; 
+            periods(condi).two_speeds_ago = NaN; 
+           
 
         % For finished stop, care only about 2 speeds ago
         % and accel. 
         case 5 
-            % Initialize empty fields
-            all_speeds = [ speeds];
-            for speedi = 1: size (all_speeds,2)
-                speed = all_speeds(speedi);
-                for acceli = 1:size(accels_startstop, 2)
-                    accel =accels_startstop(acceli);
-                    new_name = {[ short_name '.x' num2str(speed) '.x' num2str(accel)]};
-                    periods =[periods; new_name];
-                end 
-            end
+            periods(condi).current_speed = NaN;
+            periods(condi).current_accel = accels_startstop; 
+            periods(condi).previous_speed = NaN;
+            periods(condi).previous_accel = NaN; 
+            periods(condi).two_speeds_ago = speeds; 
 
         % For warning start, warning start probe, and continued rest don't
-        % care about anything
+        % care about anything (there's only one possible value of each).
         case num2cell([8,18, 27])
-            periods =[ periods; {short_name}];
-
-        % Motor maintaining, warning maintaining, probe warning maintaining,and motor no change
-        % care about all speeds, including 0; and no
-        % warning
-        case num2cell([3,12,13,17,22, 23])   
-
-            all_speeds = [0 speeds];
-            % add names
-            for speedi = 1: size (all_speeds,2)
-                new_name = {[short_name '.x' num2str(all_speeds(speedi))]};
-                periods =[periods; new_name];
-            end 
+            periods(condi).current_speed = NaN;
+            periods(condi).current_accel = NaN; 
+            periods(condi).previous_speed = NaN;
+            periods(condi).previous_accel = NaN; 
+            periods(condi).two_speeds_ago = NaN; 
 
     end
 end
-% Remove the empty first entry
-periods = periods(2:end);
 
 % Save
 save([dir_out 'periods.mat'], 'periods');
+
 
 %% Create structure of groupings of periods that are similar.--For timeseries of different durations
 
