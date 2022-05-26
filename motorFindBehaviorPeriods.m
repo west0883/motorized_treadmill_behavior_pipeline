@@ -40,6 +40,13 @@
 % all_periods -- a structure that holds all the behavior periods.
 function [parameters] = motorFindBehaviorPeriods(parameters)
     
+    % Announce what stack you're on.
+    message = ['Finding '];
+    for dispi = 1:numel(parameters.values)/2
+        message = [message parameters.values{dispi} ', '];
+    end
+    disp(message);
+   
     % For convenience
     trial = parameters.trial; 
 
@@ -94,6 +101,9 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
     
     % Find the start of the trial by finding the string 'Starting Mouse
     % Runner' in the first colomn. 
+    % Set up a holder for start_point
+    start_point = NaN; 
+    % Check each entry of trial.
     for i = 1:size(trial, 1)
         if strcmp(trial{i,1}, 'Starting Mouse Runner')
             
@@ -103,6 +113,15 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
             break
         end 
     end 
+
+    % If no start point found, display to user, tell RunAnalysis not to save, and skip to next iteration.
+    if isnan(start_point)
+
+        disp('No start point found.')
+        parameters.dont_save = true;
+        return
+
+    end
     
     % Go through every entry after the start point, not including the last
     % 'finished stopping' or 'Done' entries
