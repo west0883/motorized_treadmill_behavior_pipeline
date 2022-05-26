@@ -93,10 +93,16 @@ parameters.wheel_radius = 8.5;
 % exact whole second or half second in duration. 
 parameters.smallest_time_increment = 0.5 * parameters.fps;
 
+% Amount of time after a transition that you want to start counting as a
+% "continued" behavior, in seconds. (In spontanuous locomotion paper,
+% fluorescence took ~2.5 s to return to baseline after the mice stopped.)
+paramters.continued_window = 3; 
+
 %% Extract data and save as .mat file.  
 extractMotorData(parameters);
 
 %% Find behavior periods.
 motor_FindBehaviorPeriods_all(parameters);
 
-%% Count types of behavior periods? 
+%% Make into more code-readable structure format
+motor_behavior_period_structures(paramters); 
