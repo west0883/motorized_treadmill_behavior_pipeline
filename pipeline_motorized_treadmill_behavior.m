@@ -105,6 +105,11 @@ parameters.accels_acceldecel = [200, 400, 600, 800];
 
 %% Extract data and save as .mat file -- with Putty
 
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
 % Get only mice_all days with putty_for_motor = 'yes'.
 for i = 1:numel(parameters.mice_all)
     putty_flags = strcmp({parameters.mice_all(i).days.putty_for_motor}, 'yes'); 
@@ -118,7 +123,7 @@ parameters.putty_flag = true;
 parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
                'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
                'log', { 'dir("Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\', 'mouse', '\Arduino Output\Motor_ArduinoOutput*.log").name'}, 'log_iterator'; 
-               'stack', {'[loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').stacks; loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').spontaneous]'}, 'stack_iterator'};
+               'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').stacks'}, 'stack_iterator'};
 
 parameters.loop_variables.mice_all = parameters.mice_all;
 
@@ -138,19 +143,50 @@ parameters.loop_list.things_to_save.trial.level = 'stack';
 RunAnalysis({@extractMotorData}, parameters);
 
 %% Extract data and save as .mat file -- with NO Putty
+
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
 % Get only mice_all days with putty_for_motor = 'no'.
 for i = 1:numel(parameters.mice_all)
     putty_flags = strcmp({parameters.mice_all(i).days.putty_for_motor}, 'no'); 
     parameters.mice_all(i).days(~putty_flags) = [];
 end 
 
+% Was PUTTY used for the recording? 
+parameters.putty_flag = false;
+
+% Iterations.
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+               'log', { 'dir("Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\', 'mouse', '\Arduino Output\Motor_ArduinoOutput*.log").name'}, 'log_iterator'; 
+               'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').stacks'}, 'stack_iterator'};
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+
+% Input values
+parameters.loop_list.things_to_load.log.dir = {'Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\', 'mouse', '\Arduino Output\'};
+parameters.loop_list.things_to_load.log.filename= {'log'}; 
+parameters.loop_list.things_to_load.log.variable= {}; 
+parameters.loop_list.things_to_load.log.level = 'day';
+parameters.loop_list.things_to_load.log.load_function = @readtext;
+
+% Output values. 
+parameters.loop_list.things_to_save.trial.dir = {[parameters.dir_exper 'behavior\extracted motor data\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.trial.filename= {'trial', 'stack', '.mat'};
+parameters.loop_list.things_to_save.trial.variable= {'trial'}; 
+parameters.loop_list.things_to_save.trial.level = 'stack';
+
+RunAnalysis({@extractMotorData}, parameters);
 
 %% Find behavior periods.
 
 % Iterators
 parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
                'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
-               'stack', {'[loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').stacks; loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').spontaneous]'}, 'stack_iterator'};
+               'stack', {'[loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').stacks'}, 'stack_iterator'};
 
 parameters.loop_variables.mice_all = parameters.mice_all;
 
