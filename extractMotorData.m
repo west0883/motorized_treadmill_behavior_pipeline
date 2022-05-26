@@ -108,24 +108,20 @@ function [] = extractMotorData(parameters)
                         
                         % Now look for the end point
                         
-                        % If this isn't the last stack,
-                        if stacki < size(stackList.filenames,1)
-                            next_stacknum = stackList.numberList(stacki + 1, :); 
-                            for i = start_point:size(trial_all,1)
-                                if strcmp(trial_all{i,1}, ['Trial ' num2str(str2num(next_stacknum))])
+                        % Get the next possible stacknumber. (Needs to
+                        % include next stack that wasn't recorded, because
+                        % a new trial is always loaded up instantly by
+                        % Arduino).
+                        next_stacknum = str2num(stackList.numberList(stacki, :)) + 1 ; 
+                        for i = start_point:size(trial_all,1)
+                            if strcmp(trial_all{i,1}, ['Trial ' num2str(next_stacknum)])
 
-                                    % mark the end point as the last row before the new Trial label, break the loop
-                                    end_point = i-1; 
-                                    break
-                                end 
-                            end
-                        else
-                            % If this is the last stack, assign end to end
-                            % of log.
-                            end_point = size(trial_all,1);
+                                % mark the end point as the last row before the new Trial label, break the loop
+                                end_point = i-1; 
+                                break
+                            end 
                         end
-                        
-                        
+
                         % If end point not found, assign the last value of
                         % matrix and skip
                         if isnan(end_point)
