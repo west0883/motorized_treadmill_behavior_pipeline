@@ -84,27 +84,12 @@ parameters.wheel_radius = 8.5;
 % From .log if PUTTY was used, from .txt files if it wasn't. 
 extractMotorData(parameters);
 
-%% Clean and format data. (Can take awhile).
-
-% For now, change the input data name--> might do something different later
-parameters.input_data_name={'trial', 'stack number', '.mat'}; 
-
-% Run code.
-formatEncoderData(parameters);
-
-%% Calculate smoothed and corrected velocity.
-% Also removes the skip period here.
-% For now, change the input data name--> might do something different later
-parameters.input_data_name={'trial', 'stack number', '.mat'}; 
-
-saveVelocities(parameters); 
-
-%% Pull out locomotion periods.
+%% Find behavior periods.
 
 % For now, change the input data name--> might do something different later
 parameters.input_data_name={'vel', 'stack number', '.mat'}; 
 
-encoderFindBehaviorPeriods(parameters);
+motorFindBehaviorPeriods(parameters);
 
 %% Segment velocities.
 segmentVelocities(parameters); 
