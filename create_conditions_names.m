@@ -5,9 +5,9 @@
 clear all;
 
 % Time for continued time chunks, in seconds.
-continued_chunk_length = 3;
+continued_chunk_length = 1;
 
-experiment_name=['Random Motorized Treadmill\' num2str(continued_chunk_length) 's continued'];
+experiment_name=['Random Motorized Treadmill\'];
 
 dir_base='Y:\Sarah\Analysis\Experiments\';
 dir_exper=[dir_base experiment_name '\']; 
@@ -400,6 +400,9 @@ end
 save([dir_out 'periods.mat'], 'periods');
 
 %% Now make something that works better with code
+
+load([dir_out 'periods.mat']);
+
 loop_list.iterators = {
                'condition', {'loop_variables.periods(:).name'}, 'condition_iterator';
                'speed', {'loop_variables.periods(', 'condition_iterator', ').speed'}, 'speed_iterator';
@@ -426,6 +429,12 @@ end
 [~, ia, ~] = unique(holder, 'rows','stable');
 looping_output_list = looping_output_list(ia);
 periods = looping_output_list;
+
+% Remove unecessary "iterator" fields.
+fields = {'condition_iterator', 'speed_iterator', 'accel_iterator', 'previous_speed_iterator', 'previous_accel_iterator', 'two_speeds_ago_iterator'};
+periods = rmfield(periods, fields);
+
+% Make into table.
 periods = struct2table(periods);
 
 indices_to_remove = []; 
@@ -519,6 +528,11 @@ end
 
 % Remove periods (they don't actually exist)
 periods(indices_to_remove, :) = [];
+
+% Add indices to the end, for searching later.
+index = [1:size(periods,1)]';
+a = table(index);
+periods = [periods a];
 
 % Save
 save([dir_out 'periods_nametable.mat'], 'periods');
