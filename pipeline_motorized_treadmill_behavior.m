@@ -12,11 +12,20 @@ clear all;
 % Output Directories
 
 % Create the experiment name. This is used to name the output folder. 
-parameters.experiment_name='Random Motorized Treadmill';
+%parameters.experiment_name='Random Motorized Treadmill';
 
 % Output directory name bases
 parameters.dir_base='Y:\Sarah\Analysis\Experiments\';
+%parameters.dir_exper=[parameters.dir_base parameters.experiment_name '\']; 
+
+% Length of time (in seconds) you want continued behaviors to be divided
+% into.
+parameters.continued_chunk_length = 3; 
+
+% FOR 3S CONTINUED BEHAVIOR
+parameters.experiment_name= ['Random Motorized Treadmill\' num2str(parameters.continued_chunk_length) 's continued'];
 parameters.dir_exper=[parameters.dir_base parameters.experiment_name '\']; 
+
 
 % *********************************************************
 % Data to process
@@ -69,9 +78,6 @@ parameters.fps= 20;
 % fluorescence took ~2.5 s to return to baseline after the mice stopped.)
 parameters.continued_window = 3; 
 
-% Length of time (in seconds) you want continued behaviors to be divided
-% into.
-parameters.continued_chunk_length = 3; 
 
 % Number of channels from brain data (need this to calculate correct
 % "skip" time length).
@@ -95,9 +101,6 @@ parameters.wheel_radius = 8.5;
 % exact whole second or half second in duration. 
 parameters.smallest_time_increment = 0.5 * parameters.fps;
 
-% FOR 3S CONTINUED BEHAVIOR
-parameters.experiment_name= ['Random Motorized Treadmill\' num2str(parameters.continued_chunk_length) 's continued'];
-parameters.dir_exper=[parameters.dir_base parameters.experiment_name '\']; 
 
 %% Extract data and save as .mat file -- with Putty
 
