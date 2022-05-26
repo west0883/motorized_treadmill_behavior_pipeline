@@ -268,12 +268,13 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
         % the size of your trial list.
         switch activity_tag
             
-            % Rest, walking, maintaining, and motor probe no change periods
-            case num2cell([3, 5, 6, 7, 23, 25, 27]) 
+            % Rest, walking, maintaining, and motor probe no change
+            % periods. And maintaining no warning.
+            case num2cell([3, 5, 6, 7, 17, 23, 25, 27]) 
                 
-                % If the available time range is above the specified
+                % If the available time range is above or equal to the specified
                 % continued window, divide them and concatenat separately
-                if (behavior_period.time_range(2) - behavior_period.time_range(1)) > (parameters.continued_window * parameters.fps -1)
+                if (behavior_period.time_range(2) - behavior_period.time_range(1)) >= (parameters.continued_window * parameters.fps -1)
                    
                    % Get all the associated parameters. 
                    finished_behavior_period = behavior_period;
@@ -295,9 +296,12 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
                    % time-chunks. Size of chunkcs given by parameters.continued_chunk_length . 
                    period_length = continued_behavior_period.time_range(2) - (continued_behavior_period.time_range(1)-1); 
 
-                   % If this instances is greater than the desired chunk
+                   % Clear any brokendown from previous items.
+                   brokendown = []; 
+
+                   % If this instances is greater than or exactly the size of desired chunk
                    % length
-                   if period_length > parameters.continued_chunk_length * parameters.fps 
+                   if period_length >= parameters.continued_chunk_length * parameters.fps 
                       
                       % find how many chunks the instance can make 
                       quotient=floor(period_length/(parameters.continued_chunk_length * parameters.fps));
@@ -326,22 +330,33 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
                               brokendown=[brokendown; new_chunk_start, new_chunk_end ] ;
                           end 
                       end
-                   else
-                       %if it isn't too long (can only happen if exactly the length of the time window)
-                       %make only 1 chunk using the start and stop of the
-                       %instancee
-                       brokendown=[continued_behavior_period.time_range];   
+%                    else
+%                        %if it isn't too long (can only happen if exactly the length of the time window)
+%                        %make only 1 chunk using the start and stop of the
+%                        %instancee
+%                        brokendown=[continued_behavior_period.time_range];   
                    end
 
                    % Replace continued instances with broken-down versions,
                    % have to do each individually. 
-                   for chunki = 1:size(brokendown,1)
-                        continued_behavior_period(chunki,1).time_range = brokendown(chunki, :);
-                        continued_behavior_period(chunki,1).speed = continued_behavior_period(1).speed;
-                        continued_behavior_period(chunki,1).accel = continued_behavior_period(1).accel;
-                        continued_behavior_period(chunki,1).previous_speed = continued_behavior_period(1).previous_speed;
-                        continued_behavior_period(chunki,1).previous_accel = continued_behavior_period(1).previous_accel;
-                        continued_behavior_period(chunki,1).two_speeds_ago = continued_behavior_period(1).two_speeds_ago;
+                   % If brokendown is empy, make continued_behavior_period
+                   % fields empty
+                   if isempty(brokendown)
+                        continued_behavior_period(chunki,1).time_range = [];
+                        continued_behavior_period(chunki,1).speed = [];
+                        continued_behavior_period(chunki,1).accel = [];
+                        continued_behavior_period(chunki,1).previous_speed = [];
+                        continued_behavior_period(chunki,1).previous_accel = [];
+                        continued_behavior_period(chunki,1).two_speeds_ago = [];
+                   else
+                       for chunki = 1:size(brokendown,1)
+                            continued_behavior_period(chunki,1).time_range = brokendown(chunki, :);
+                            continued_behavior_period(chunki,1).speed = continued_behavior_period(1).speed;
+                            continued_behavior_period(chunki,1).accel = continued_behavior_period(1).accel;
+                            continued_behavior_period(chunki,1).previous_speed = continued_behavior_period(1).previous_speed;
+                            continued_behavior_period(chunki,1).previous_accel = continued_behavior_period(1).previous_accel;
+                            continued_behavior_period(chunki,1).two_speeds_ago = continued_behavior_period(1).two_speeds_ago;
+                       end
                    end 
 
                    % Concatenate finished period. Don't include if the
@@ -358,8 +373,8 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
                        % Put in continued rest
                        eval(['all_periods.' parameters.Conditions(27).short '= [all_periods.' parameters.Conditions(27).short '; continued_behavior_period];']);
                   
-                   elseif activity_tag == 3 || 23
-                       % If maintaining or motor probe no change, need to see if this is at rest or
+                   elseif activity_tag == 3 || activity_tag == 23 || activity_tag == 17
+                       % If maintaining or motor probe no change, or maintaining no warning, need to see if this is at rest or
                        % at walking.
 
                        % If at rest, put in continued rest.
@@ -370,15 +385,19 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
                        else
                            eval(['all_periods.' parameters.Conditions(26).short '= [all_periods.' parameters.Conditions(26).short '; continued_behavior_period];']);
                        end
+                   
+                   elseif activity_tag == 27 
+                       % Put in continued rest
+                       eval(['all_periods.' parameters.Conditions(27).short '= [all_periods.' parameters.Conditions(27).short '; continued_behavior_period];']);
 
-                   else
+                   elseif activity_tag == 26
                        % Put in continued walking
                        eval(['all_periods.' parameters.Conditions(26).short '= [all_periods.' parameters.Conditions(26).short '; continued_behavior_period];']);
                    end
                    
-                % If time range isn't long enough, concatenate just as the "finished"
-                else    
-                     eval(['all_periods.' parameters.Conditions(activity_tag).short '= [all_periods.' parameters.Conditions(activity_tag).short '; behavior_period];']);
+%                 % If time range isn't long enough, concatenate just as the "finished"
+%                 else    
+%                      eval(['all_periods.' parameters.Conditions(activity_tag).short '= [all_periods.' parameters.Conditions(activity_tag).short '; behavior_period];']);
                 end 
             
             % If periods don't need to be divided, concatenate normally     
