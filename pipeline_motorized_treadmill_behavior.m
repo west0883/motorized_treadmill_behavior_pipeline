@@ -85,24 +85,6 @@ parameters.wheel_radius = 8.5;
 % exact whole second or half second in duration. 
 parameters.smallest_time_increment = 0.5 * parameters.fps;
 
-% Amount of time after a transition that you want to start counting as a
-% "continued" behavior, in seconds. (In spontanuous locomotion paper,
-% fluorescence took ~2.5 s to return to baseline after the mice stopped.)
-parameters.continued_window = 3; 
-
-% Length of time (in seconds) you want continued behaviors to be divided
-% into.
-parameters.continued_chunk_length = 3; 
-
-% Possble speeds 
-parameters.speeds = [1600, 2000, 2400, 2800];
-
-% Possible start/stop accels. Issue with 200 being used sometimes
-parameters.accels_startstop = [200, 400, 600, 800];
-
-% Possible acel/decel accels; issues with 600 being used sometimes
-parameters.accels_acceldecel = [200, 400, 600, 800]; 
-
 %% Extract data and save as .mat file -- with Putty
 
 % Always clear loop list first. 
@@ -202,6 +184,15 @@ parameters.load_abort_flag = true;
 % Don't remove empty iterations. 
 parameters.removeEmptyIterations = false;  
 
+% Amount of time after a transition that you want to start counting as a
+% "continued" behavior, in seconds. (In spontanuous locomotion paper,
+% fluorescence took ~2.5 s to return to baseline after the mice stopped.)
+parameters.continued_window = 3; 
+
+% Length of time (in seconds) you want continued behaviors to be divided
+% into.
+parameters.continued_chunk_length = 1; 
+
 % Reset mice_all (because you're changing it for the Putty only stacks)
 parameters.mice_all = mice_all; 
 parameters.mice_all = parameters.mice_all(1);
@@ -267,7 +258,6 @@ parameters.loop_list.things_to_save.all_periods_table.dir = {[parameters.dir_exp
 parameters.loop_list.things_to_save.all_periods_table.filename= {'all_periods_', 'stack', '.mat'};
 parameters.loop_list.things_to_save.all_periods_table.variable= {'all_periods'}; 
 parameters.loop_list.things_to_save.all_periods_table.level = 'stack';
-
 
 % motor_behavior_period_structures(parameters); 
 RunAnalysis({@MotorBehaviorPeriodsTable}, parameters); 
