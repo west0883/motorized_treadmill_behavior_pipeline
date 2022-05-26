@@ -85,9 +85,16 @@ function [] = motor_behavior_period_structures(parameters)
                                 
                                 if ~isempty(time_range)
                                     struc_name = ['holding_structure.' short_name '.x' num2str(speed)];
-                                    eval([struc_name '= [' struc_name '; time_range];']);  
+                                    
+                                    % Sometimes Arduino did something weird
+                                    % with ending of trials, so ignore
+                                    % things that don't fit.
+                                    try 
+                                        eval([struc_name '= [' struc_name '; time_range];']);  
+                                
+                                    end 
                                 end 
-                            end 
+                            end
                             
                         % For accel, decel, faccel, & fdecel we care about the
                         % previous speed, current speed, and acceleration
