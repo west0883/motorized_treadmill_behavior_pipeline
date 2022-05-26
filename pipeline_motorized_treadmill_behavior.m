@@ -36,6 +36,7 @@ parameters.Conditions = Conditions;
 % ****Change here if there are specific mice, days, and/or stacks you want to work with**** 
 parameters.mice_all = parameters.mice_all(1);
 
+
 % **********************************************************************8
 % Input Directories
 
@@ -62,6 +63,15 @@ parameters.wheel_Hz = 1000;
 % Sampling frequency of collected brain data (per channel), in Hz or frames per
 % second.
 parameters.fps= 20; 
+
+% Amount of time after a transition that you want to start counting as a
+% "continued" behavior, in seconds. (In spontanuous locomotion paper,
+% fluorescence took ~2.5 s to return to baseline after the mice stopped.)
+parameters.continued_window = 3; 
+
+% Length of time (in seconds) you want continued behaviors to be divided
+% into.
+parameters.continued_chunk_length = 1; 
 
 % Number of channels from brain data (need this to calculate correct
 % "skip" time length).
@@ -184,18 +194,10 @@ parameters.load_abort_flag = true;
 % Don't remove empty iterations. 
 parameters.removeEmptyIterations = false;  
 
-% Amount of time after a transition that you want to start counting as a
-% "continued" behavior, in seconds. (In spontanuous locomotion paper,
-% fluorescence took ~2.5 s to return to baseline after the mice stopped.)
-parameters.continued_window = 3; 
-
-% Length of time (in seconds) you want continued behaviors to be divided
-% into.
-parameters.continued_chunk_length = 1; 
-
 % Reset mice_all (because you're changing it for the Putty only stacks)
 parameters.mice_all = mice_all; 
 parameters.mice_all = parameters.mice_all(1);
+
 
 % Iterators
 parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
