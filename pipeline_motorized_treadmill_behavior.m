@@ -139,7 +139,7 @@ parameters.loop_list.things_to_load.log.level = 'day';
 parameters.loop_list.things_to_load.log.load_function = @readtext;
 
 % Output values. 
-parameters.loop_list.things_to_save.trial.dir = {[parameters.dir_exper 'behavior\extracted motor data\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.trial.dir = {[parameters.dir_exper 'behavior\motorized\extracted motor data\'], 'mouse', '\', 'day', '\'};
 parameters.loop_list.things_to_save.trial.filename= {'trial', 'stack', '.mat'};
 parameters.loop_list.things_to_save.trial.variable= {'trial'}; 
 parameters.loop_list.things_to_save.trial.level = 'stack';
@@ -181,7 +181,7 @@ parameters.loop_list.things_to_load.log.level = 'stack';
 parameters.loop_list.things_to_load.log.load_function = @readtext;
 
 % Output values. 
-parameters.loop_list.things_to_save.trial.dir = {[parameters.dir_exper 'behavior\extracted motor data\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.trial.dir = {[parameters.dir_exper 'behavior\motorized\extracted motor data\'], 'mouse', '\', 'day', '\'};
 parameters.loop_list.things_to_save.trial.filename= {'trial', 'stack', '.mat'};
 parameters.loop_list.things_to_save.trial.variable= {'trial'}; 
 parameters.loop_list.things_to_save.trial.level = 'stack';
@@ -216,13 +216,13 @@ parameters.location_putty_flag = {'parameters.mice_all(', 'mouse_iterator', ').d
 parameters.location_accel_flag = {'parameters.mice_all(', 'mouse_iterator', ').days(', 'day_iterator', ').number_accels_used'};
 
 % Input
-parameters.loop_list.things_to_load.trial.dir = {[parameters.dir_exper 'behavior\extracted motor data\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.trial.dir = {[parameters.dir_exper 'behavior\motorized\extracted motor data\'], 'mouse', '\', 'day', '\'};
 parameters.loop_list.things_to_load.trial.filename= {'trial', 'stack', '.mat'};
 parameters.loop_list.things_to_load.trial.variable= {'trial'}; 
 parameters.loop_list.things_to_load.trial.level = 'stack';
 
 % Output
-parameters.loop_list.things_to_save.all_periods.dir = {[parameters.dir_exper 'behavior\period instances\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.all_periods.dir = {[parameters.dir_exper 'behavior\motorized\period instances\'], 'mouse', '\', 'day', '\'};
 parameters.loop_list.things_to_save.all_periods.filename= {'all_periods_', 'stack', '.mat'};
 parameters.loop_list.things_to_save.all_periods.variable= {'all_periods'}; 
 parameters.loop_list.things_to_save.all_periods.level = 'stack';
