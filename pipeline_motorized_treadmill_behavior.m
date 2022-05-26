@@ -188,7 +188,8 @@ parameters.loop_list.things_to_save.trial.level = 'stack';
 
 RunAnalysis({@extractMotorData}, parameters);
 
-%% With Putty: Find behavior periods.
+%% Find behavior periods. 
+% (Don't need to separate Putty vs non-Putty)
 
 % Always clear loop list first. 
 if isfield(parameters, 'loop_list')
@@ -202,22 +203,17 @@ parameters.load_abort_flag = true;
 parameters.mice_all = mice_all; 
 parameters.mice_all = parameters.mice_all(1);
 
-% Get only mice_all days with putty_for_motor = 'yes'.
-for i = 1:numel(parameters.mice_all)
-    putty_flags = strcmp({parameters.mice_all(i).days.putty_for_motor}, 'yes'); 
-    parameters.mice_all(i).days(~putty_flags) = [];
-end 
-
-% Was PUTTY used for the recording? 
-parameters.putty_flag = true;
-
 % Iterators
 parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
                'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
                'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').stacks'}, 'stack_iterator'};
 
 parameters.loop_variables.mice_all = parameters.mice_all;
-parameters.loop_variables.mice_all = parameters.mice_all;
+
+% Tell code where to find Putty and Accel flags as strings in CreateStrings
+% format
+parameters.location_putty_flag = {'parameters.mice_all(', 'mouse_iterator', ').days(', 'day_iterator', ').putty_for_motor'};
+parameters.location_accel_flag = {'parameters.mice_all(', 'mouse_iterator', ').days(', 'day_iterator', ').number_accels_used'};
 
 % Input
 parameters.loop_list.things_to_load.trial.dir = {[parameters.dir_exper 'behavior\extracted motor data\'], 'mouse', '\', 'day', '\'};
