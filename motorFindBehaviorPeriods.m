@@ -29,8 +29,11 @@
 %  *  21 = Warning cue: probe, decelerating cue, no change in motor.
 %  *  22 = Warning cue: probe, maintaining cue, no change in motor.
 %  *  23 = Motor probe: no change.
+%  *  24 = motor starting
+%  *  25 = motor finished starting    
 %  *  26 = Continued walking.
 %  *  27 = Continued rest.
+%  *  28 = Motor: probe, no warning tone, starting
 
 % Input: 
 % useAccel -- number of accelerations used. If only one accel used, the columns will be
@@ -384,6 +387,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
             
             % If periods don't need to be divided, concatenate normally     
             otherwise     
+                duration = behavior_period.time_range(2) - behavior_period.time_range(1);
                 eval(['all_periods.' parameters.Conditions(activity_tag).short '= [all_periods.' parameters.Conditions(activity_tag).short '; behavior_period];']);
         end 
    
