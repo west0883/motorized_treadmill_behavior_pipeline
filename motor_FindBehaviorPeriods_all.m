@@ -40,7 +40,8 @@ function [] = motor_FindBehaviorPeriods_all(parameters)
             
             % Cycle through the stack files. 
             for stacki=1:size(stackList.filenames,1)
-
+                %disp(stacki);
+                
                 % Get the stack number and filename for the stack.
                 stack_number = stackList.numberList(stacki, :);
                 filename = stackList.filenames(stacki, :);
