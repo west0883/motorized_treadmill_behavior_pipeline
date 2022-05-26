@@ -278,6 +278,5 @@ parameters.loop_list.things_to_save.all_periods_table.dir = {[parameters.dir_exp
 parameters.loop_list.things_to_save.all_periods_table.filename= {'all_periods_', 'stack', '.mat'};
 parameters.loop_list.things_to_save.all_periods_table.variable= {'all_periods'}; 
 parameters.loop_list.things_to_save.all_periods_table.level = 'stack';
-
-% motor_behavior_period_structures(parameters); 
+ 
 RunAnalysis({@MotorBehaviorPeriodsTable}, parameters); 
