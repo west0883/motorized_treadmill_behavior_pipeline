@@ -40,6 +40,7 @@ mkdir(dir_out);
 %  *  25 = Motor: finished starting
 %  *  26 = Continued walking.
 %  *  27 = Continued rest.
+%  *  28 = Motor: provbe, no warning tone, starting
 
 Conditions(1).name = 'motor accelerating';
 Conditions(1).short = 'm_accel';
@@ -97,5 +98,7 @@ Conditions(26).name = 'continued walking';
 Conditions(26).short = 'c_walk'; 
 Conditions(27).name = 'continued rest';
 Conditions(27).short = 'c_rest'; 
+Conditions(28).name = 'motor: probe, no warning, starting';
+Conditions(28).short = 'm_p_nowarn_start'; 
 
 save([dir_out 'Behavior_Conditions.mat'], 'Conditions');

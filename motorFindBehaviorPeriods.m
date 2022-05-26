@@ -114,6 +114,9 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
         % Add + 1 to start of time range, so each time point belongs to exactly one period 
         behavior_period.time_range(1) = behavior_period.time_range(1) + 1;
         
+        % Subtract out the skip from the time range.
+        behavior_period.time_range = behavior_period.time_range - parameters.skip/parameters.channelNumber; 
+        
         % Pull out the speed, previous speed, and the  "activity tag" for
         % categorizing.
         behavior_period.speed = trial{i, speed_column}; 
@@ -170,7 +173,15 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
                 activity_tag = 25; 
                 
             end 
- 
+        
+        % No warning, motor accelerating    
+        elseif activity_tag == 14
+            if behavior_period.previous_speed == 0
+
+                    % Starting
+                    activity_tag = 28;
+
+            end
         end 
          
         % Now concatenate fields based on activity_tag. All concatenated at
