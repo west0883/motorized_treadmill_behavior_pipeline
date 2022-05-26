@@ -39,9 +39,9 @@ parameters.Conditions = Conditions;
 % Ex cont: stackList=ListStacks(numberVector,digitNumber); 
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
-parameters.mice_all(1).days = parameters.mice_all(1).days(1:6);
-parameters.mice_all(2).days = parameters.mice_all(2).days(1:5);
-parameters.mice_all(3).days = parameters.mice_all(3).days(1:5);
+parameters.mice_all(1).days = parameters.mice_all(1).days(1:6); %(1:6);
+parameters.mice_all(2).days = parameters.mice_all(2).days(1:5); %(1:5);
+parameters.mice_all(3).days = parameters.mice_all(3).days(1:5); %(1:5);
 % **********************************************************************8
 % Input Directories
 
@@ -81,7 +81,7 @@ parameters.frames=6000;
 parameters.skip = 1200; 
 
 % Using variable accelerations?
-parameters.useAccel = false;
+parameters.useAccel = true;
 
 % Was PUTTY used for the recording? 
 parameters.putty_flag = false;
@@ -98,11 +98,20 @@ parameters.smallest_time_increment = 0.5 * parameters.fps;
 % fluorescence took ~2.5 s to return to baseline after the mice stopped.)
 parameters.continued_window = 3; 
 
+% Possble speeds 
+parameters.speeds = [1600, 2000, 2400, 2800];
+
+% Possible start/stop accels. Issue with 200 being used sometimes
+parameters.accels_startstop = [200, 400, 600, 800];
+
+% Possible acel/decel accels; issues with 600 being used sometimes
+parameters.accels_acceldecel = [200, 400, 600, 800]; 
+
 %% Extract data and save as .mat file.  
 extractMotorData(parameters);
 
 %% Find behavior periods.
 motor_FindBehaviorPeriods_all(parameters);
 
-%% Make into more code-readable structure format
+%% Make into more later code-readable structure format
 motor_behavior_period_structures(parameters); 
