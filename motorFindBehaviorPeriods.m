@@ -133,7 +133,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
     
     % Go through every entry after the start point, not including the last
     % 'finished stopping' or 'Done' entries
-    for i = start_point + 1 : size(trial,1) - 2
+    for i =start_point + 1  : size(trial,1) - 2
         
         % Pull out the time range of this stage. Need to subtract out the
         % first reported time.
@@ -168,6 +168,14 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
         
         % Subtract out the skip from the time range.
         behavior_period.time_range = behavior_period.time_range - parameters.skip/parameters.channelNumber; 
+
+        % Make sure the time range doesn't excede the max frame number
+        % (already converted to fps, skip subtracted). If it doers, skip to
+        % next stage. (This can happen sometimes with mis-timings from
+        % Arduino/Arduino told to run an extra few seconds for safety).
+        if any(behavior_period.time_range > parameters.frames)
+            continue
+        end
         
         % Pull out the speed, previous speed, and the  "activity tag" for
         % categorizing.
@@ -284,9 +292,9 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
                       continued_behavior_period.time_range = [[behavior_period.time_range(1) + parameters.continued_window * parameters.fps], behavior_period.time_range(2)]; 
                    end
                    
-                   % Further divide continued periods into the desired
+                   % Further divide REMAINING continued periods into the desired
                    % time-chunks. Size of chunkcs given by parameters.continued_chunk_length . 
-                   period_length = behavior_period.time_range(2) - behavior_period.time_range(1); 
+                   period_length = continued_behavior_period.time_range(2) - (continued_behavior_period.time_range(1)-1); 
 
                    % If this instances is greater than the desired chunk
                    % length
@@ -307,7 +315,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
 
                       % if the instance can create more than 1 3-second chunk
                       if quotient>1
-                          for quotienti=1:(quotient-1) % don't use the last one because you're cycling through the *start* of each chunk
+                          for quotienti=1:(quotient -1) % don't use the last one because you're cycling through the *start* of each chunk
 
                               % find the start of the given chunk
                               new_chunk_start= continued_behavior_period.time_range(1) + parameters.continued_chunk_length * parameters.fps*quotienti;
@@ -323,7 +331,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
                        %if it isn't too long (can only happen if exactly the length of the time window)
                        %make only 1 chunk using the start and stop of the
                        %instancee
-                       brokendown=[brokendown; periods_holding(instancei,:)];   
+                       brokendown=[continued_behavior_period.time_range];   
                    end
 
                    % Replace continued instances with broken-down versions,
