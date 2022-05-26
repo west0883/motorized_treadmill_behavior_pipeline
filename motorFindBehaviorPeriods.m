@@ -36,13 +36,13 @@
 % trial -- an nx 4 or n x 5 cell created by extractMotorData.m. Time, speed, [accel,] activity tag, message 
 % Output: 
 % all_periods -- a structure that holds all the behavior periods.
-function [all_periods] = findBehaviorPeriods(trial, useAccel)
+function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
     
     % Put all info per stage into a structure called behavior_period, then 
     % concatenate each field per activity tag. 
      
     % Set columns based on useAccel. 
-    if useAccel 
+    if parameters.useAccel 
         time_column = 1;
         speed_column = 2;
         accel_column = 3; 
@@ -55,26 +55,32 @@ function [all_periods] = findBehaviorPeriods(trial, useAccel)
         % Set a defaul accel that was used. 
         default_accel = 800; 
     end 
-    
-    % Load list of behavior periods.
-    load([dir_exper 'Behavior_Conditions.mat']); 
   
     % Initialize empty behavior condition variables with fields
-    for condi = 1:size(Conditions,2)
-        eval(['all_periods.' Conditions(condi).short '.speed = [];']); % The current speed. Is the ending speed for speed transitions
-        eval(['all_periods.' Conditions(condi).short '.accel = [];']); % Needed for speed transitions
-        eval(['all_periods.' Conditions(condi).short '.previos_speed = [];']); % Needed for immediately post-transition. Is the starting speed for transition periods 
-        eval(['all_periods.' Conditions(condi).short '.previous_accel = [];']); % Needed for immediately post-transition
-        eval(['all_periods.' Conditions(condi).short '.two_speeds_ago = [];']); % May need for immediately post-transition analysis (to know what kind of transition just happened)
+    for condi = 1:size(parameters.Conditions,2)
+        eval(['all_periods.' parameters.Conditions(condi).short '.time_range = [];']);
+        eval(['all_periods.' parameters.Conditions(condi).short '.speed = [];']); % The current speed. Is the ending speed for speed transitions
+        eval(['all_periods.' parameters.Conditions(condi).short '.accel = [];']); % Needed for speed transitions
+        eval(['all_periods.' parameters.Conditions(condi).short '.previous_speed = [];']); % Needed for immediately post-transition. Is the starting speed for transition periods 
+        eval(['all_periods.' parameters.Conditions(condi).short '.previous_accel = [];']); % Needed for immediately post-transition
+        eval(['all_periods.' parameters.Conditions(condi).short '.two_speeds_ago = [];']); % May need for immediately post-transition analysis (to know what kind of transition just happened)
     end
     
     % Find the start of the trial by finding the string 'Starting Mouse
     % Runner' in the first colomn. 
-    start_point = find(strcmp(trial(:,1), 'Starting Mouse Runner'));
+    for i = 1:size(trial, 1)
+        if strcmp(trial{i,1}, 'Starting Mouse Runner')
+            
+            % When you find it, get the index and break out of the loop
+            start_point = i; % find(strcmp(trial{:,1}, 'Starting Mouse Runner'));
+            
+            break
+        end 
+    end 
     
     % Go through every entry after the start point, not including the last
-    % 'Done' entry.
-    for i = start_point + 1 : size(trial,1) - 1
+    % 'finished stopping' or 'Done' entries
+    for i = start_point + 1 : size(trial,1) - 2
        
         % Find the relevant time ranges for this stage. 
         % If two consecutive times are the same (happens when motor is
@@ -86,26 +92,46 @@ function [all_periods] = findBehaviorPeriods(trial, useAccel)
             behavior_period.time_range = [trial{i,  time_column} trial{i + 1,  time_column} - 1]; 
         end 
         
+        % Find the skip range in wheel data points
+        skip_range = parameters.skip / (parameters.fps * parameters.channelNumber) * parameters.wheel_Hz; % Convert to seconds, then multiply by Arduino time sampling rate 
+        
+        % If either parts of the time range falls within the skipped time range, don't
+        % record it.
+        if behavior_period.time_range(1) <= skip_range || behavior_period.time_range(2) <= skip_range
+            continue 
+        end 
         % Pull out the speed, previous speed, and the  "activity tag" for
         % categorizing.
         behavior_period.speed = trial{i, speed_column}; 
-        behavior_period.accel = trial{i, accel_column}; 
-        behavior_period.activity_tag = trial{i, activity_column};
+        if parameters.useAccel == 1
+            behavior_period.accel = trial{i, accel_column}; 
+        else
+            behavior_period.accel = default_accel;
+        end
+        activity_tag = trial{i, activity_column};
     
         % If it's the first stage, set previous speed to 0, just in case
         if i == start_point +1 
             behavior_period.previous_speed = 0;
-            
+            behavior_period.previous_accel = 0;
         else 
             % Otherwise, get speed and accel from previous stage.
             behavior_period.previous_speed = trial{i - 1, speed_column};
-            behavior_period.previous_accel = trial{i - 1, accel_column}; 
+            if parameters.useAccel == 1 
+                behavior_period.previous_accel = trial{i - 1, accel_column};
+            else
+                behavior_period.previous_accel = default_accel;
+            end
         end
         
         % If the stage isn't one of the first two stages, get the 2 speeds
         % ago value.
         if i > start_point + 2
             behavior_period.two_speeds_ago = trial{i - 2, speed_column};
+        else
+            % Make it empty so you don't get yelled at by Matlab field
+            % concatenation sizes.
+            behavior_period.two_speeds_ago = []; 
         end 
         
         % Divide acceleration tag into actual accel and starting
@@ -135,7 +161,8 @@ function [all_periods] = findBehaviorPeriods(trial, useAccel)
            
         % Now concatenate fields based on activity_tag. All concatenated at
         % once. 
-        eval(['all_periods.' Conditions(activity_tag).short '.speed = [' Conditions(activity_tag).short '; behavior_period];']);
+        
+        eval(['all_periods.' parameters.Conditions(activity_tag).short '= [all_periods.' parameters.Conditions(activity_tag).short '; behavior_period];']);
                 
     end
 end 
