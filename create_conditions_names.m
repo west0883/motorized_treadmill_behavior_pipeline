@@ -12,6 +12,19 @@ dir_exper=[dir_base experiment_name '\'];
 dir_out=dir_exper; 
 mkdir(dir_out);
 
+% Frame rate of brain recordings-- the frame rate all calculations will be
+% done in.
+fps = 20; 
+
+% Time for continued time chunks, in seconds.
+continued_chunk_length = 1;
+
+% Time for finished xyz chunkcs, in seconds
+finished_chunk_length = 3; 
+
+% Warning period length (seconds)
+warning_length = 5; 
+
 % Activity tag list of possible periods 
 %  *  1 = motor accelerating
 %  *  2 = motor decelerating
@@ -310,7 +323,7 @@ for condi =1:size(Conditions,2)
         % types, and the no change in motor probe,we only care about the 
         % current speed subdivisions.  Motor maintaining, warning maintaining, probe warning maintaining,and motor no change
         % care about speeds, including 0; and no warning
-        % Warning for starting, stopping, accel, decel
+        % Warning for stopping, accel, decel
         % Probes for those,
         % Continued walking
         % Motor maintaining
@@ -395,9 +408,9 @@ loop_list.iterators = {
                'two_speeds_ago', {'loop_variables.periods(', 'condition_iterator', ').two_speeds_ago'}, 'two_speeds_ago_iterator'
                };
 
-loop_variables.periods = periods; 
-
-looping_output_list = LoopGenerator(loop_list, loop_variables);
+ loop_variables.periods = periods; 
+% 
+ %looping_output_list = LoopGenerator(loop_list, loop_variables);
 
 holder = NaN(size(looping_output_list,1), size(loop_list.iterators,1));
 for iteratori = 1:size(loop_list.iterators,1)
@@ -413,6 +426,99 @@ end
 looping_output_list = looping_output_list(ia);
 periods = looping_output_list;
 periods = struct2table(periods);
+
+indices_to_remove = []; 
+% Add a column for duration, in frames.
+for periodi = 1:size(periods,1)
+
+    % Exceptions: 
+
+    % For all finished periods & maintaining
+    if strcmp(periods.condition{periodi}(1:3), 'm_f') ...
+            || strcmp(periods.condition{periodi}, 'm_maint') ...
+            || strcmp(periods.condition{periodi}, 'm_p_nochange') ...
+            || strcmp(periods.condition{periodi}, 'm_p_nowarn_maint')
+        periods.duration{periodi} = finished_chunk_length * fps;  
+        
+
+        % Still calculate the duration for removing not-real ones, though
+        final = str2double(periods.speed{periodi});
+        first = str2double(periods.two_speeds_ago{periodi}); 
+        accel = str2double(periods.accel{periodi}); 
+
+        duration = (final - first)/accel * fps;
+
+        
+        % If this is an accel or its probe & the duration is negative, you
+        % can remove it because it doesn't actually exist.
+        if duration < 0 & strcmp(periods.condition{periodi}, 'm_faccel') 
+            indices_to_remove = [indices_to_remove; periodi];
+        
+        elseif duration > 0 & strcmp(periods.condition{periodi}, 'm_fdecel') 
+            indices_to_remove = [indices_to_remove; periodi];
+        
+        % If duration is 0, remove.
+        elseif duration == 0
+            
+            indices_to_remove = [indices_to_remove; periodi];
+       
+        end 
+
+    % For continued periods. 
+    elseif strcmp(periods.condition{periodi}, 'c_walk') || strcmp(periods.condition{periodi}, 'c_rest')
+           
+
+       periods.duration{periodi} = continued_chunk_length * fps; 
+    
+    % For warning periods
+    elseif strcmp(periods.condition{periodi}(1:2), 'w_')
+        periods.duration{periodi} = warning_length * fps ;
+
+    % For starts, stops, accels, decels, & their probes
+    else
+
+        % Grab current & previous speeds. If either are "NaN", set to 0.
+        if strcmp(periods.speed{periodi}, "NaN")
+            final = 0; 
+        else 
+            final = str2double(periods.speed{periodi});  
+        end
+
+        if strcmp(periods.previous_speed{periodi}, "NaN")
+            first = 0; 
+        else 
+            first = str2double(periods.previous_speed{periodi});  
+        end
+        
+        accel = str2double(periods.accel{periodi});
+
+        duration = (final - first)/accel * fps; 
+
+        % If this is an accel or its probe & the duration is negative, you
+        % can remove it because it doesn't actually exist.
+        if duration < 0 & (strcmp(periods.condition{periodi}, 'm_accel') || strcmp(periods.condition{periodi}, 'm_p_nowarn_accel')) 
+            indices_to_remove = [indices_to_remove; periodi];
+        
+        % If this is an decel or its probe & the duration is positive, you
+        % can remove it because it doesn't actually exist.
+        elseif duration > 0 & (strcmp(periods.condition{periodi}, 'm_decel') || strcmp(periods.condition{periodi}, 'm_p_nowarn_decel')) 
+            indices_to_remove = [indices_to_remove; periodi];
+  
+        % If duration is 0, remove.
+        elseif duration == 0
+            indices_to_remove = [indices_to_remove; periodi];
+        end 
+
+        % Now assign the absolute value
+        periods.duration{periodi} = abs(duration);
+
+    end
+
+end 
+
+% Remove periods (they don't actually exist)
+periods(indices_to_remove, :) = [];
+
 % Save
 save([dir_out 'periods_nametable.mat'], 'periods');
 
