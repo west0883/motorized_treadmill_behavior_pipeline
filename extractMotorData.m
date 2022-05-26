@@ -9,12 +9,8 @@ function [parameters] = extractMotorData(parameters)
 
     putty_flag = parameters.putty_flag;
 
-    % Announce what stack you're on.
-     message = ['Extracting '];
-     for dispi = 1:numel(parameters.values)/2
-        message = [message ', ' parameters.values{dispi}];
-     end
-     disp(message);
+    % Display progress message to user.
+    MessageToUser('Extracting ', parameters);
 
     % If not using PUTTY
     if ~putty_flag 

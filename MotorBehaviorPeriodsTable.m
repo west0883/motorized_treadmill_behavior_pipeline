@@ -17,12 +17,8 @@ function [parameters] = MotorBehaviorPeriodsTable(parameters)
     % List field names needed for information about each time range. 
     information_fields = {'speed', 'accel', 'previous_speed', 'previous_accel', 'two_speeds_ago'};
 
-    % Announce what stack you're on.
-    message = ['Finding '];
-    for dispi = 1:numel(parameters.values)/2
-        message = [message parameters.values{dispi} ', '];
-    end
-    disp(message);
+    % Display progress message to user.
+    MessageToUser('Finding ', parameters);
     
     % For each period/condition name in all_periods,
     for periodi = 1:numel(period_names)

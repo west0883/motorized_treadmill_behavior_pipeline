@@ -43,12 +43,8 @@
 % all_periods -- a structure that holds all the behavior periods.
 function [parameters] = motorFindBehaviorPeriods(parameters)
     
-    % Announce what stack you're on.
-    message = ['Finding '];
-    for dispi = 1:numel(parameters.values)/2
-        message = [message parameters.values{dispi} ', '];
-    end
-    disp(message);
+    % Display progress message to user.
+    MessageToUser('Finding ', parameters);
    
     % For convenience
     trial = parameters.trial; 
