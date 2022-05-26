@@ -14,11 +14,20 @@ function [parameters] = extractMotorData(parameters)
     digitNumber = parameters.digitNumber; 
     putty_flag = parameters.putty_flag;
 
+    % Announce what stack you're on.
+     message = ['Extracting '];
+     for dispi = 1:numel(parameters.values)/2
+        message = [message ', ' parameters.values{dispi}];
+     end
+     disp(message);
+
     % If not using PUTTY
     if ~putty_flag 
       
-        % Just return, you've already read in the text at the RunAnalysis
+        % Just change the name and return, you've already read in the text at the RunAnalysis
         % step.
+        parameters.trial = parameters.log; 
+        
         return
                 
     % If using Putty,          
@@ -35,13 +44,15 @@ function [parameters] = extractMotorData(parameters)
         for i = 1:size(parameters.log, 1)
 
             % Look for the trial number, have to convert to a
-            % number and back to remove the leading 0s.
+            % number and back to remove the leading 0s. Will always be the
+            % 'stack' keyword-value pair 
+            stack_number = CreateStrings({'stack'}, parameters.keywords, parameters.values);
+
             if strcmp(parameters.log{i,1}, ['Trial ' num2str(str2num(stack_number))])
 
                 % mark the start point, break the loop
                 start_point = i; 
-                
-                disp(['Found trial ' stack_number ]);
+               
                 break
             end 
         end 
@@ -61,7 +72,8 @@ function [parameters] = extractMotorData(parameters)
         % include next stack that wasn't recorded, because
         % a new trial is always loaded up instantly by
         % Arduino).
-        next_stacknum = str2num(stackList.numberList(stacki, :)) + 1 ; 
+        next_stacknum = str2num(stack_number) + 1; 
+        
         for i = start_point:size(parameters.log,1)
             if strcmp(parameters.log{i,1}, ['Trial ' num2str(next_stacknum)])
 
