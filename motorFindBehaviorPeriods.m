@@ -78,67 +78,28 @@ function [] = findBehaviorPeriods(trial, possible_speeds)
         
         % First, go through each activity tag. (Will go through speeds as a
         % sub-set of each activity).
-        switch activity_tag
         
-            case 1 % motor accelerating
-                
-                switch previous_speed 
-                    
-                    case 0
-                       
-                        % Starting 
-                        
-                    
-                    otherwise 
-                        
-                        % Accelerating
-                        
-                end
-                
-            case 2 % Motor decelerating
-                
-            case 3 % Motor maintaining
-                
-            case 4 % Motor stopping
-                
-            case 5 % Motor finished stopping 
+        if activity_tag == 1 % motor accelerating
 
-            case 6
+            switch previous_speed 
+
+                case 0
+
+                    % Starting 
+
+
+                otherwise 
+
+                    % Accelerating
+
+            end
+
+        else 
+         % All others can be divided with just the activity tag. 
+
+ 
+        end 
+           
                 
-            case 7
-                
-            case 8
-                
-            case 9
-                
-            case 10
-                
-            case 11
-                
-            case 12
-                
-            case 13
-                
-            case 14
-                
-            case 15
-                
-            case 16
-                
-            case 17
-                
-            case 18
-                
-            case 19
-            
-            case 20
-                
-            case 21
-                
-            case 22
-                 
-            case 23
-                
-        end
     end
 end 
