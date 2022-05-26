@@ -81,25 +81,31 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
     % Go through every entry after the start point, not including the last
     % 'finished stopping' or 'Done' entries
     for i = start_point + 1 : size(trial,1) - 2
-       
-        % Find the relevant time ranges for this stage. 
+        
+        % Pull out the time range of this stage. Need to subtract out the
+        % first reported time.
+        behavior_period.time_range = [trial{i,  time_column} - trial{start_point +1 , time_column},  trial{i + 1,  time_column} - trial{start_point +1 , time_column} - 1]; 
+        
+        % Convert the time range to hemo-corrected frame range. (Convert to 
+        % seconds, then multiply by brain sampling rate & round to nearest integer.) 
+        behavior_period.time_range = round(behavior_period.time_range ./ parameters.wheel_Hz .* parameters.fps);
+     
+        % If the END of the time range falls within the skipped time range, don't
+        % record it.
+        if behavior_period.time_range(2) <= parameters.skip
+            continue 
+        % If only the beginning of the time range falls before the skipped 
+        % time range, truncate that period to not include the skip     
+        elseif behavior_period.time_range(1) <= parameters.skip
+             behavior_period.time_range(1) = parameters.skip + 1; 
+        end 
+         
         % If two consecutive times are the same (happens when motor is
         % already stopped), skip this stage and continue next iteration
         if trial{i, time_column} == trial{i + 1, time_column}
             continue
-        % Otherwise, pull out the time range. 
-        else
-            behavior_period.time_range = [trial{i,  time_column} trial{i + 1,  time_column} - 1]; 
         end 
         
-        % Find the skip range in wheel data points
-        skip_range = parameters.skip / (parameters.fps * parameters.channelNumber) * parameters.wheel_Hz; % Convert to seconds, then multiply by Arduino time sampling rate 
-        
-        % If either parts of the time range falls within the skipped time range, don't
-        % record it.
-        if behavior_period.time_range(1) <= skip_range || behavior_period.time_range(2) <= skip_range
-            continue 
-        end 
         % Pull out the speed, previous speed, and the  "activity tag" for
         % categorizing.
         behavior_period.speed = trial{i, speed_column}; 
