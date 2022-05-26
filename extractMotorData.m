@@ -30,6 +30,8 @@ function [] = extractMotorData(parameters)
             % Get the day name.
             day=mice_all(mousei).days(dayi).name; 
             
+            disp(['mouse ' mouse ' day ' day]);
+            
             % Create data input directory and cleaner output directory. 
             parameters.dir_in=CreateFileStrings(dir_dataset_name, mouse, day, [], [], false);
             dir_out=[dir_out_base mouse '\' day '\']; 
