@@ -41,7 +41,7 @@ parameters.mice_all = parameters.mice_all(1);
 % Input Directories
 
 % Establish the format of the daily/per mouse directory and file names of 
-% the collected data. Will be assembled with CreateFileStrings.m Each piece 
+% the collected data. Will be assembled with CreateStrings.m Each piece 
 % needs to be a separate entry in a cell  array. Put the string 'mouse 
 % number', 'day', or 'stack number' where the mouse, day, or stack number 
 % will be. If you concatenated this as a sigle string, it should create a 
@@ -71,7 +71,7 @@ parameters.continued_window = 3;
 
 % Length of time (in seconds) you want continued behaviors to be divided
 % into.
-parameters.continued_chunk_length = 1; 
+parameters.continued_chunk_length = 3; 
 
 % Number of channels from brain data (need this to calculate correct
 % "skip" time length).
@@ -94,6 +94,10 @@ parameters.wheel_radius = 8.5;
 % Smallest time increment. All accelerations and stage times should be an
 % exact whole second or half second in duration. 
 parameters.smallest_time_increment = 0.5 * parameters.fps;
+
+% FOR 3S CONTINUED BEHAVIOR
+parameters.experiment_name= ['Random Motorized Treadmill\' num2str(parameters.continued_chunk_length) 's continued'];
+parameters.dir_exper=[parameters.dir_base parameters.experiment_name '\']; 
 
 %% Extract data and save as .mat file -- with Putty
 
