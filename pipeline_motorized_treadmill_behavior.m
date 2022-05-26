@@ -199,6 +199,9 @@ end
 % Skip any files that don't exist. 
 parameters.load_abort_flag = true; 
 
+% Don't remove empty iterations. 
+parameters.removeEmptyIterations = false;  
+
 % Reset mice_all (because you're changing it for the Putty only stacks)
 parameters.mice_all = mice_all; 
 parameters.mice_all = parameters.mice_all(1);
@@ -230,4 +233,4 @@ parameters.loop_list.things_to_save.all_periods.level = 'stack';
 RunAnalysis({@motorFindBehaviorPeriods}, parameters);
 
 %% Make into more later code-readable structure format
-motor_behavior_period_structures(parameters); 
+% motor_behavior_period_structures(parameters); 
