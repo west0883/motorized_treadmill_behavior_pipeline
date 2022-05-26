@@ -310,6 +310,12 @@ for condi =1:size(Conditions,2)
         % types, and the no change in motor probe,we only care about the 
         % current speed subdivisions.  Motor maintaining, warning maintaining, probe warning maintaining,and motor no change
         % care about speeds, including 0; and no warning
+        % Warning for starting, stopping, accel, decel
+        % Probes for those,
+        % Continued walking
+        % Motor maintaining
+        % Maintaining probes
+        % Motor no change probe.
         case num2cell([9:11 19:21 26 3,12,13,17,22, 23])
              periods(condi).speed = speeds;
              periods(condi).accel = NaN; 
@@ -317,52 +323,52 @@ for condi =1:size(Conditions,2)
              periods(condi).previous_accel = NaN; 
              periods(condi).two_speeds_ago = NaN; 
 
-        % For accel, decel, & corresponding proves, we care about the
-        % previous speed, current speed, and acceleration
+        % For accel, decel, & corresponding probes, we care about the
+        % previous speed (no 0), current speed (no 0), and acceleration
         case num2cell([1, 2, 14, 15])
             
-            periods(condi).speed = speeds;
+            periods(condi).speed = speeds(2:end);
             periods(condi).accel = accels_acceldecel; 
-            periods(condi).previous_speed = speeds;
+            periods(condi).previous_speed = speeds(2:end);
             periods(condi).previous_accel = NaN; 
             periods(condi).two_speeds_ago = NaN; 
             
 
         % For finished accel & finished decel, we care about 
-        % current speed, 2 speeds ago, and acceleration.
+        % current speed (no 0), 2 speeds ago (no 00, and acceleration.
         case num2cell([6, 7]) 
-            periods(condi).speed = speeds;
+            periods(condi).speed = speeds(2:end);
             periods(condi).accel = accels_acceldecel; 
             periods(condi).previous_speed = NaN;
             periods(condi).previous_accel = NaN; 
-            periods(condi).two_speeds_ago = speeds; 
+            periods(condi).two_speeds_ago = speeds(2:end); 
 
-        % For start, no warning start, & finished start, care only about current speed and accel
+        % For start, no warning start, & finished start, care only about current speed (no 0)and accel
         case num2cell([24, 25, 28])
-            periods(condi).speed = speeds;
+            periods(condi).speed = speeds(2:end);
             periods(condi).accel = accels_startstop; 
             periods(condi).previous_speed = NaN;
             periods(condi).previous_accel = NaN; 
             periods(condi).two_speeds_ago = NaN; 
 
         % For stop & no warning stop, care only about
-        % previous speed and accel.
+        % previous speed (no 0) and accel.
         case num2cell([4, 16])
             periods(condi).speed = NaN;
             periods(condi).accel = accels_startstop; 
-            periods(condi).previous_speed = speeds;
+            periods(condi).previous_speed = speeds(2:end);
             periods(condi).previous_accel = NaN; 
             periods(condi).two_speeds_ago = NaN; 
            
 
-        % For finished stop, care only about 2 speeds ago
+        % For finished stop, care only about 2 speeds ago (no 0).
         % and accel. 
         case 5 
             periods(condi).speed = NaN;
             periods(condi).accel = accels_startstop; 
             periods(condi).previous_speed = NaN;
             periods(condi).previous_accel = NaN; 
-            periods(condi).two_speeds_ago = speeds; 
+            periods(condi).two_speeds_ago = speeds(2:end); 
 
         % For warning start, warning start probe, and continued rest don't
         % care about anything (there's only one possible value of each).
