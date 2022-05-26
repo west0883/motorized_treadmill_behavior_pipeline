@@ -55,6 +55,91 @@ function [] = extractMotorData(parameters)
                     save([dir_out 'trial' stack_number '.mat'], 'trial', '-v7.3');
 
                 end
+                
+            % If using Putty,          
+            else
+
+                % Get a list of log names.
+                filelist = dir([parameters.dir_in parameters.input_data_name{1}]);
+                
+                % For each matching log name,
+                for logi = 1:size(filelist,1)
+                    
+                    disp(['Checking log ' num2str(logi)]);
+                   
+                    filename = [parameters.dir_in filelist(logi).name];
+                   
+                    trial_all = readtext(filename);
+
+                    % Cycle through the stack files. 
+                    for stacki=1:size(stackList.filenames,1)
+
+                        % Get the stack number and filename for the stack.
+                        stack_number = stackList.numberList(stacki, :); 
+
+                        % Make default NaN values for start_point and end_point 
+                        % so you get an error if the real start point wasn't found,
+                        % instead of using the wrong data.
+                        start_point = NaN;
+                        end_point = NaN;
+
+                        % Find trial starting point by looking for 'Trial ...' string at
+                        % beginning of each trial.
+                        for i = 1:size(trial_all, 1)
+
+                            % Look for the trial number, have to convert to a
+                            % number and back to remove the leading 0s.
+                            if strcmp(trial_all{i,1}, ['Trial ' num2str(str2num(stack_number))])
+
+                                % mark the start point, break the loop
+                                start_point = i; 
+                                
+                                disp(['Found trial ' stack_number ]);
+                                break
+                            end 
+                        end 
+                        
+                        % If start point didn't get a value, skip to next
+                        % trial
+                        if isnan(start_point)
+                           disp(['Start of trial ' stack_number ' not found']);
+                           continue 
+                        end
+                        
+                        % Now look for the end point
+                        
+                        % If this isn't the last stack,
+                        if stacki < size(stackList.filenames,1)
+                            next_stacknum = stackList.numberList(stacki + 1, :); 
+                            for i = start_point:size(trial_all,1)
+                                if strcmp(trial_all{i,1}, ['Trial ' num2str(str2num(next_stacknum))])
+
+                                    % mark the end point as the last row before the new Trial label, break the loop
+                                    end_point = i-1; 
+                                    break
+                                end 
+                            end
+                        else
+                            % If this is the last stack, assign end to end
+                            % of log.
+                            end_point = size(trial_all,1);
+                        end
+                        
+                        
+                        % If end point not found, assign the last value of
+                        % matrix and skip
+                        if isnan(end_point)
+                           disp(['End of trial ' stack_number ' not found, assigning to end of log.']);
+                           end_point = size(trial_all,1);
+                        end
+                        
+                        % Assign range of this trial.
+                        trial = trial_all(start_point:end_point, :);
+
+                        % Save
+                        save([dir_out 'trial' stack_number '.mat'], 'trial', '-v7.3');
+                    end  
+                end
             end
         end
     end
