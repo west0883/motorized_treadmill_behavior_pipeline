@@ -26,7 +26,7 @@ parameters.continued_chunk_length = 3;
 parameters.experiment_name= ['Random Motorized Treadmill\' num2str(parameters.continued_chunk_length) 's continued'];
 parameters.dir_exper=[parameters.dir_base parameters.experiment_name '\']; 
 
-
+parameters.dir_exper_original = [parameters.dir_base 'Random Motorized Treadmill\']; 
 % *********************************************************
 % Data to process
 
@@ -217,7 +217,7 @@ parameters.location_putty_flag = {'parameters.mice_all(', 'mouse_iterator', ').d
 parameters.location_accel_flag = {'parameters.mice_all(', 'mouse_iterator', ').days(', 'day_iterator', ').number_accels_used'};
 
 % Input
-parameters.loop_list.things_to_load.trial.dir = {[parameters.dir_exper 'behavior\motorized\extracted motor data\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.trial.dir = {[parameters.dir_exper_original 'behavior\motorized\extracted motor data\'], 'mouse', '\', 'day', '\'};
 parameters.loop_list.things_to_load.trial.filename= {'trial', 'stack', '.mat'};
 parameters.loop_list.things_to_load.trial.variable= {'trial'}; 
 parameters.loop_list.things_to_load.trial.level = 'stack';
