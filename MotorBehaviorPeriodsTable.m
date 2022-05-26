@@ -70,34 +70,38 @@ function [parameters] = MotorBehaviorPeriodsTable(parameters)
                 continue
             end
 
-            % Check that the duration of this occurance matches the
-            % duration of the matched index. Otherwise, skip.
-            
-            % Calculate duration, adding 1 for comparison to the periods
-            % table duration.
-            duration_instance = occurances_structure(instancei).time_range(2) - occurances_structure(instancei).time_range(1) +1; 
-            duration_desired = parameters.all_periods_table.duration{index};
-            if duration_instance ~= duration_desired
-
-%                 % If it's in the "finished" or "maintining" phases, only
-%                 % keep if between the continued chunk length and desired duration
-%                 if (strcmp(parameters.all_periods_table.condition{index}(1:3), 'm_f') ...
-%                     || strcmp(periods.condition{periodi}, 'm_maint') ...
-%                     || strcmp(periods.condition{periodi}, 'm_p_nochange') ...
-%                     || strcmp(periods.condition{periodi}, 'm_p_nowarn_maint'))
-%                     & (duration_instance < duration_desired) & duration_instance  
-% 
-
-
-                % Skip to next instance
-                disp(['Dimension error in ' num2str(index) ', ' parameters.all_periods_table.condition{index}]);
+            % Check if this instance is empty. If so, skip. 
+            if isempty(occurances_structure(instancei).time_range)
                 continue
+            else
+                % Check that the duration of this occurance matches the
+                % duration of the matched index. Otherwise, skip.
+                
+                % Calculate duration, adding 1 for comparison to the periods
+                % table duration.s
+                duration_instance = occurances_structure(instancei).time_range(2) - occurances_structure(instancei).time_range(1) +1;
+                duration_desired = parameters.all_periods_table.duration{index};
+                if duration_instance ~= duration_desired
+    
+    %                 % If it's in the "finished" or "maintining" phases, only
+    %                 % keep if between the continued chunk length and desired duration
+    %                 if (strcmp(parameters.all_periods_table.condition{index}(1:3), 'm_f') ...
+    %                     || strcmp(periods.condition{periodi}, 'm_maint') ...
+    %                     || strcmp(periods.condition{periodi}, 'm_p_nochange') ...
+    %                     || strcmp(periods.condition{periodi}, 'm_p_nowarn_maint'))
+    %                     & (duration_instance < duration_desired) & duration_instance  
+    % 
+    
+    
+                    % Skip to next instance
+                    disp(['Dimension error in ' num2str(index) ', ' parameters.all_periods_table.condition{index}]);
+                    continue
+                end
+    
+                % Put these in the correct time range entry, concatenated with
+                % any previous instances.
+                parameters.all_periods_table.time_ranges{index} = [parameters.all_periods_table.time_ranges{index}; occurances_structure(instancei).time_range];
             end
-
-            % Put these in the correct time range entry, concatenated with
-            % any previous instances.
-            parameters.all_periods_table.time_ranges{index} = [parameters.all_periods_table.time_ranges{index}; occurances_structure(instancei).time_range];
-
         end 
     end 
 
