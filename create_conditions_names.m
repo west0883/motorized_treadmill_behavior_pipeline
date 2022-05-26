@@ -36,6 +36,10 @@ mkdir(dir_out);
 %  *  21 = Warning cue: probe, decelerating cue, no change in motor.
 %  *  22 = Warning cue: probe, maintaining cue, no change in motor.
 %  *  23 = Motor probe: no change.
+%  *  24 = Motor: starting
+%  *  25 = Motor: finished starting
+%  *  26 = Continued walking.
+%  *  27 = Continued rest.
 
 Conditions(1).name = 'motor accelerating';
 Conditions(1).short = 'm_accel';
@@ -89,5 +93,9 @@ Conditions(24).name = 'motor: starting';
 Conditions(24).short = 'm_start'; 
 Conditions(25).name = 'motor: finished starting';
 Conditions(25).short = 'm_fstart'; 
+Conditions(26).name = 'continued walking';
+Conditions(26).short = 'c_walk'; 
+Conditions(27).name = 'continued rest';
+Conditions(27).short = 'c_rest'; 
 
 save([dir_out 'Behavior_Conditions.mat'], 'Conditions');

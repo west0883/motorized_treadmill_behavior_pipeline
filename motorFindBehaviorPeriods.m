@@ -29,6 +29,8 @@
 %  *  21 = Warning cue: probe, decelerating cue, no change in motor.
 %  *  22 = Warning cue: probe, maintaining cue, no change in motor.
 %  *  23 = Motor probe: no change.
+%  *  26 = Continued walking.
+%  *  27 = Continued rest.
 
 % Input: 
 % useAccel -- a boolean. If accels weren't used, the columns will be
@@ -170,11 +172,50 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
             end 
  
         end 
-           
+         
         % Now concatenate fields based on activity_tag. All concatenated at
-        % once. 
-        
-        eval(['all_periods.' parameters.Conditions(activity_tag).short '= [all_periods.' parameters.Conditions(activity_tag).short '; behavior_period];']);
+        % once. Must divide the "motor: finished ... " periods into recently
+        % finished (< 3 seconds) and the "continued" periods-- have to do 
+        % this here because otherwise you're increasing the size of your
+        % trial list.
+        switch activity_tag
+            
+            % Walking periods
+            case num2cell([5, 6, 7, 25]) 
                 
+                % If the available time range is above the specified
+                % continued window, divide them and concatenat separately
+                if behavior_period.time_range(2) - behavior_period.time_range(1) > (paramters.continued_window * paramters.fps -1)
+                   
+                   % Get all the associated paramters
+                   finished_behavior_period = behavior_period;
+                   continued_behavior_period = behavior_period;
+                   
+                   % Divide
+                   finished_behavior_period.time_range = [behavior_period.time_range(1), [behavior_period.time_range(1) + paramters.continued_window * paramters.fps -1]];
+                   continued_behevior_period.time_range = [[behavior_period.time_range(1) + paramters.continued_window * paramters.fps], behavior_period.time_range(2)]; 
+                   
+                   % Concatenate finished period
+                   eval(['all_periods.' parameters.Conditions(activity_tag).short '= [all_periods.' parameters.Conditions(activity_tag).short '; finished_behavior_period];']);
+                   
+                   % Concatenate continued period, depending on if rest or not
+                   if activity_tag == 5
+                       % Put in continued rest
+                       eval(['all_periods.' parameters.Conditions(27).short '= [all_periods.' parameters.Conditions(activity_tag).short '; continued_behavior_period];']);
+                   else
+                       % Put in continued walking
+                       eval(['all_periods.' parameters.Conditions(26).short '= [all_periods.' parameters.Conditions(activity_tag).short '; continued_behavior_period];']);
+                   end
+                   
+                % If time range isn't long enough, concatenate just as the "finished"
+                else    
+                     eval(['all_periods.' parameters.Conditions(activity_tag).short '= [all_periods.' parameters.Conditions(activity_tag).short '; behavior_period];']);
+                end 
+            
+            % If periods don't need to be divided, concatenate normally     
+            otherwise     
+                eval(['all_periods.' parameters.Conditions(activity_tag).short '= [all_periods.' parameters.Conditions(activity_tag).short '; behavior_period];']);
+        end 
+   
     end
 end 
