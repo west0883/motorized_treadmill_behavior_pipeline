@@ -232,5 +232,42 @@ parameters.loop_list.things_to_save.all_periods.level = 'stack';
 
 RunAnalysis({@motorFindBehaviorPeriods}, parameters);
 
-%% Make into more later code-readable structure format
+%% Make into more later code-readable table format
+
+% Use the periods.mat to help you tell which fields to care about, use the
+% periods_nametable.mat to collect the the time ranges. 
+
+% Load periods.mat for conditions names 
+load([parameters.dir_exper 'periods_nametable.mat']); 
+parameters.Conditions = periods; 
+
+% Always clear loop list first. 
+if isfield(parameters, 'loop_list')
+parameters = rmfield(parameters,'loop_list');
+end
+
+% Skip any files that don't exist. 
+parameters.load_abort_flag = true; 
+
+% Iterators
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+               'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').stacks'}, 'stack_iterator'};
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+
+% Input
+parameters.loop_list.things_to_load.all_periods.dir = {[parameters.dir_exper 'behavior\motorized\period instances\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.all_periods.filename= {'all_periods_', 'stack', '.mat'};
+parameters.loop_list.things_to_load.all_periods.variable= {'all_periods'}; 
+parameters.loop_list.things_to_load.all_periods.level = 'stack';
+
+% Output 
+parameters.loop_list.things_to_save.all_periods_table.dir = {[parameters.dir_exper 'behavior\motorized\period instances table format\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.all_periods_table.filename= {'all_periods_', 'stack', '.mat'};
+parameters.loop_list.things_to_save.all_periods_table.variable= {'all_periods'}; 
+parameters.loop_list.things_to_save.all_periods_table.level = 'stack';
+
+
 % motor_behavior_period_structures(parameters); 
+RunAnalysis({@MotorBehaviorPeriodsTable}, parameters); 
