@@ -38,8 +38,11 @@
 % trial -- an nx 4 or n x 5 cell created by extractMotorData.m. Time, speed, [accel,] activity tag, message 
 % Output: 
 % all_periods -- a structure that holds all the behavior periods.
-function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
+function [parameters] = motorFindBehaviorPeriods(parameters)
     
+    % For convenience
+    trial = parameters.trial; 
+
     % Put all info per stage into a structure called behavior_period, then 
     % concatenate each field per activity tag. 
      
@@ -350,4 +353,8 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
         end 
    
     end
-end 
+
+    % Put all_periods into parameters.
+    parameters.all_periods = all_periods;
+end
+
