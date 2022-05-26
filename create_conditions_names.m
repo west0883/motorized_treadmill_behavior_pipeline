@@ -107,8 +107,8 @@ save([dir_out 'Behavior_Conditions.mat'], 'Conditions');
 %%
 % Create a periods structure
 speeds = [1600, 2000, 2400, 2800]; 
-accels_startstop = [400, 600, 800];
-accels_acceldecel = [200, 400, 800]; 
+accels_startstop = [400, 800];
+accels_acceldecel = [200, 800]; 
 
 periods = cell(1,1); 
 for condi =1:size(Conditions,2)
@@ -283,3 +283,101 @@ periods = periods(2:end);
 
 % Save
 save([dir_out 'periods.mat'], 'periods');
+
+%% Create structure of groupings of periods that are similar.
+speeds = [1600, 2000, 2400, 2800]; 
+accels_startstop = [400, 800];
+accels_acceldecel = [200, 800]; 
+
+periods_grouped = cell(1,1);
+
+% Accelerations -- same magnitude, accel 
+
+% For each possible acceleration.
+for acceli = 1:numel(accels_acceldecel) 
+    accel = accels_acceldecel(acceli);
+    
+    % For each possible magnitude
+    for magi = 1:numel(speeds)-1
+    
+        % Find the magnitude of the change.
+        magnitude = magi * 400;
+   
+        new_name = {[ 'm_accel.x' num2str(accel) '.' num2str(magnitude)]};
+           
+        periods_grouped = [periods_grouped; new_name];
+        
+    end
+end 
+
+% Decelerations -- same magnitude, accel
+
+% For each possible acceleration.
+for acceli = 1:numel(accels_acceldecel) 
+    accel = accels_acceldecel(acceli);
+    
+    % For each possible magnitude
+    for magi = 1:numel(speeds)-1
+    
+        % Find the magnitude of the change.
+        magnitude = magi * 400;
+   
+        new_name = {[ 'm_decel.x' num2str(accel) '.' num2str(magnitude)]};
+           
+        periods_grouped = [periods_grouped; new_name];
+        
+    end
+end 
+
+% Finish of accels, same accel
+for acceli = 1:numel(accels_acceldecel) 
+    accel = accels_acceldecel(acceli);
+
+    new_name = {[ 'm_faccel.x' num2str(accel)]};
+    periods_grouped = [periods_grouped; new_name];
+end 
+
+% Finish of decels, same accel
+for acceli = 1:numel(accels_acceldecel) 
+    accel = accels_acceldecel(acceli);
+   
+    new_name = {[ 'm_fdecel.x' num2str(accel)]};
+    periods_grouped = [periods_grouped; new_name];
+end 
+
+% Finish of starts, same accels, all speeds
+for acceli = 1:numel(accels_startstop) 
+    accel = accels_acceldecel(acceli);
+   
+    new_name = {[ 'm_fstart.x' num2str(accel)]};
+    periods_grouped = [periods_grouped; new_name];   
+end 
+
+% Finish of stops, same accels, all speeds.
+for acceli = 1:numel(accels_startstop) 
+    accel = accels_acceldecel(acceli);
+    new_name = {[ 'm_fstop.x' num2str(accel)]};
+    periods_grouped = [periods_grouped; new_name];
+end 
+
+% Maintaining -- rest and all speeds.
+periods_grouped = [periods_grouped; 'm_maint.rest'];
+periods_grouped = [periods_grouped; 'm_maint.walk'];
+
+% Warning of accels -- all speeds
+periods_grouped = [periods_grouped; 'w_accel'];
+
+% Warning of decels -- all speeds
+periods_grouped = [periods_grouped; 'w_decel'];
+
+% Warning of stops -- all speeds
+periods_grouped = [periods_grouped; 'w_stop'];
+
+% Warning of maintaining -- rest and all speeds
+periods_grouped = [periods_grouped; 'w_maint.rest'];
+periods_grouped = [periods_grouped; 'w_maint.walk'];
+
+% All continued walk (all speeds)
+periods_grouped = [periods_grouped; 'c_walk'];
+
+% Probes.
