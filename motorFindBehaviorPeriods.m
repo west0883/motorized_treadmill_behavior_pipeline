@@ -183,6 +183,17 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
                     activity_tag = 28;
 
             end
+            
+        % Motor maintaining at rest is reported as motor finished stopping
+        % (skips the motor stopping because that's always entered as the
+        % same time occurance)
+        elseif activity_tag == 5
+            
+            % If two speeds ago(skip the motor stopping report), then this
+            % is actually a motor maintaining.
+            if behavior_period.two_speeds_ago == 0
+                activity_tag = 3;
+            end
         end 
          
         % Now concatenate fields based on activity_tag. All concatenated at

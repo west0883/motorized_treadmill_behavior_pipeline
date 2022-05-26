@@ -27,6 +27,9 @@ function [] = motor_behavior_period_structures(parameters)
             % Get the day name.
             day=parameters.mice_all(mousei).days(dayi).name; 
             
+            % Display
+            disp(['mouse ' mouse ', day ' day]);
+            
             % Find input directory and cleaner output directory. 
             parameters.dir_in = [dir_in_base  mouse '\' day '\'];
             parameters.input_data_name = {'all_periods_', 'stack number', '.mat'};
@@ -43,7 +46,7 @@ function [] = motor_behavior_period_structures(parameters)
                 stack_number = stackList.numberList(stacki, :);
                 filename = stackList.filenames(stacki, :);
                 
-                disp(['mouse ' mouse ', day ' day ', stack ' stack_number]);
+                %disp(['mouse ' mouse ', day ' day ', stack ' stack_number]);
                 
                 % Load corresponding data
                 load([parameters.dir_in filename]);
