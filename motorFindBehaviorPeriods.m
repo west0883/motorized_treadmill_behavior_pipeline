@@ -185,15 +185,15 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
                 
                 % If the available time range is above the specified
                 % continued window, divide them and concatenat separately
-                if behavior_period.time_range(2) - behavior_period.time_range(1) > (paramters.continued_window * paramters.fps -1)
+                if behavior_period.time_range(2) - behavior_period.time_range(1) > (parameters.continued_window * parameters.fps -1)
                    
-                   % Get all the associated paramters
+                   % Get all the associated parameters
                    finished_behavior_period = behavior_period;
                    continued_behavior_period = behavior_period;
                    
                    % Divide
-                   finished_behavior_period.time_range = [behavior_period.time_range(1), [behavior_period.time_range(1) + paramters.continued_window * paramters.fps -1]];
-                   continued_behevior_period.time_range = [[behavior_period.time_range(1) + paramters.continued_window * paramters.fps], behavior_period.time_range(2)]; 
+                   finished_behavior_period.time_range = [behavior_period.time_range(1), [behavior_period.time_range(1) + parameters.continued_window * parameters.fps -1]];
+                   continued_behevior_period.time_range = [[behavior_period.time_range(1) + parameters.continued_window * parameters.fps], behavior_period.time_range(2)]; 
                    
                    % Concatenate finished period
                    eval(['all_periods.' parameters.Conditions(activity_tag).short '= [all_periods.' parameters.Conditions(activity_tag).short '; finished_behavior_period];']);

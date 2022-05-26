@@ -5,7 +5,7 @@
 % Use "create_mice_all.m" and "create_conditions_names.m" before using this.
 
 %% Initial setup
-% Put all needed paramters in a structure called "parameters", which you
+% Put all needed parameters in a structure called "parameters", which you
 % can then easily feed into your functions. 
 clear all; 
 
@@ -39,9 +39,9 @@ parameters.Conditions = Conditions;
 % Ex cont: stackList=ListStacks(numberVector,digitNumber); 
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
- parameters.mice_all = parameters.mice_all(2:3);
- parameters.mice_all(1).days = parameters.mice_all(1).days(1:2);
- parameters.mice_all(2).days = parameters.mice_all(2).days(1:2);
+parameters.mice_all(1).days = parameters.mice_all(1).days(1:6);
+parameters.mice_all(2).days = parameters.mice_all(2).days(1:5);
+parameters.mice_all(3).days = parameters.mice_all(3).days(1:5);
 % **********************************************************************8
 % Input Directories
 
@@ -96,7 +96,7 @@ parameters.smallest_time_increment = 0.5 * parameters.fps;
 % Amount of time after a transition that you want to start counting as a
 % "continued" behavior, in seconds. (In spontanuous locomotion paper,
 % fluorescence took ~2.5 s to return to baseline after the mice stopped.)
-paramters.continued_window = 3; 
+parameters.continued_window = 3; 
 
 %% Extract data and save as .mat file.  
 extractMotorData(parameters);
@@ -105,4 +105,4 @@ extractMotorData(parameters);
 motor_FindBehaviorPeriods_all(parameters);
 
 %% Make into more code-readable structure format
-motor_behavior_period_structures(paramters); 
+motor_behavior_period_structures(parameters); 
