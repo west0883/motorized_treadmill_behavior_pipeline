@@ -34,10 +34,7 @@ load([parameters.dir_exper 'Behavior_Conditions.mat']);
 parameters.Conditions = Conditions; 
 
 % ****Change here if there are specific mice, days, and/or stacks you want to work with**** 
-parameters.mice_all = [];
-parameters.mice_all(1).name = '1096';
-parameters.mice_all(1).days(1).name = '121721';
-parameters.mice_all(1).days(1).stacks = 6:15;
+parameters.mice_all = parameters.mice_all(1);
 
 % **********************************************************************8
 % Input Directories
@@ -48,7 +45,8 @@ parameters.mice_all(1).days(1).stacks = 6:15;
 % number', 'day', or 'stack number' where the mouse, day, or stack number 
 % will be. If you concatenated this as a sigle string, it should create a 
 % file name, with the correct mouse/day/stack name inserted accordingly. 
-parameters.dir_dataset_name={'Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\', 'mouse number', '\Arduino output\'};
+parameters.dir_dataset_name = {'Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\', 'mouse number', '\Arduino output\'};
+%parameters.input_data_name = {'0', 'stack number', '.txt'};
 parameters.input_data_name={'Motor_ArduinoOutput*.log'}; 
 
 % Give the number of digits that should be included in each stack number.
@@ -94,6 +92,10 @@ parameters.smallest_time_increment = 0.5 * parameters.fps;
 % "continued" behavior, in seconds. (In spontanuous locomotion paper,
 % fluorescence took ~2.5 s to return to baseline after the mice stopped.)
 parameters.continued_window = 3; 
+
+% Length of time (in seconds) you want continued behaviors to be divided
+% into.
+parameters.continued_chunk_length = 3; 
 
 % Possble speeds 
 parameters.speeds = [1600, 2000, 2400, 2800];

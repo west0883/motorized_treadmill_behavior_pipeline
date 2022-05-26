@@ -284,12 +284,23 @@ periods = periods(2:end);
 % Save
 save([dir_out 'periods.mat'], 'periods');
 
-%% Create structure of groupings of periods that are similar.
+%% Create structure of groupings of periods that are similar.--For timeseries of different durations
+
+clear all;
+
+% Directories
+experiment_name='Random Motorized Treadmill';
+dir_base='Y:\Sarah\Analysis\Experiments\';
+dir_exper=[dir_base experiment_name '\']; 
+dir_out=dir_exper; 
+mkdir(dir_out);
+
+% Possible speeds and accels. 
 speeds = [1600, 2000, 2400, 2800]; 
 accels_startstop = [400, 800];
 accels_acceldecel = [200, 800]; 
 
-periods_grouped = cell(1,1);
+periods_grouped_varyingduration = cell(1,1);
 
 % Accelerations -- same magnitude, accel 
 
@@ -305,7 +316,7 @@ for acceli = 1:numel(accels_acceldecel)
    
         new_name = {[ 'm_accel.x' num2str(accel) '.' num2str(magnitude)]};
            
-        periods_grouped = [periods_grouped; new_name];
+        periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
         
     end
 end 
@@ -324,17 +335,21 @@ for acceli = 1:numel(accels_acceldecel)
    
         new_name = {[ 'm_decel.x' num2str(accel) '.' num2str(magnitude)]};
            
-        periods_grouped = [periods_grouped; new_name];
+        periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
         
     end
 end 
+
+% Starts
+
+% Stops
 
 % Finish of accels, same accel
 for acceli = 1:numel(accels_acceldecel) 
     accel = accels_acceldecel(acceli);
 
     new_name = {[ 'm_faccel.x' num2str(accel)]};
-    periods_grouped = [periods_grouped; new_name];
+    periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
 end 
 
 % Finish of decels, same accel
@@ -342,7 +357,7 @@ for acceli = 1:numel(accels_acceldecel)
     accel = accels_acceldecel(acceli);
    
     new_name = {[ 'm_fdecel.x' num2str(accel)]};
-    periods_grouped = [periods_grouped; new_name];
+    periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
 end 
 
 % Finish of starts, same accels, all speeds
@@ -350,34 +365,111 @@ for acceli = 1:numel(accels_startstop)
     accel = accels_acceldecel(acceli);
    
     new_name = {[ 'm_fstart.x' num2str(accel)]};
-    periods_grouped = [periods_grouped; new_name];   
+    periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];   
 end 
 
 % Finish of stops, same accels, all speeds.
 for acceli = 1:numel(accels_startstop) 
     accel = accels_acceldecel(acceli);
     new_name = {[ 'm_fstop.x' num2str(accel)]};
-    periods_grouped = [periods_grouped; new_name];
+    periods_grouped_varyingduration = [periods_grouped_varyingduration; new_name];
 end 
 
 % Maintaining -- rest and all speeds.
-periods_grouped = [periods_grouped; 'm_maint.rest'];
-periods_grouped = [periods_grouped; 'm_maint.walk'];
+periods_grouped_varyingduration = [periods_grouped_varyingduration; 'm_maint.rest'];
+periods_grouped_varyingduration = [periods_grouped_varyingduration; 'm_maint.walk'];
 
 % Warning of accels -- all speeds
-periods_grouped = [periods_grouped; 'w_accel'];
+periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_accel'];
 
 % Warning of decels -- all speeds
-periods_grouped = [periods_grouped; 'w_decel'];
+periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_decel'];
 
 % Warning of stops -- all speeds
-periods_grouped = [periods_grouped; 'w_stop'];
+periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_stop'];
 
 % Warning of maintaining -- rest and all speeds
-periods_grouped = [periods_grouped; 'w_maint.rest'];
-periods_grouped = [periods_grouped; 'w_maint.walk'];
+periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_maint.rest'];
+periods_grouped_varyingduration = [periods_grouped_varyingduration; 'w_maint.walk'];
 
 % All continued walk (all speeds)
-periods_grouped = [periods_grouped; 'c_walk'];
+periods_grouped_varyingduration = [periods_grouped_varyingduration; 'c_walk'];
+
+% Continued rest. 
+periods_grouped_varyingduration = [periods_grouped_varyingduration; 'c_rest'];
 
 % Probes.
+
+% Save
+
+%% Create structure of groupings of periods that are similar.--For summary correlations or other across-duration summarys
+
+clear all;
+
+% Directories
+experiment_name='Random Motorized Treadmill';
+dir_base='Y:\Sarah\Analysis\Experiments\';
+dir_exper=[dir_base experiment_name '\']; 
+dir_out=dir_exper; 
+mkdir(dir_out);
+
+% Possible speeds and accels. 
+speeds = [1600, 2000, 2400, 2800]; 
+accels_startstop = [400, 800];
+accels_acceldecel = [200, 800]; 
+
+% Initialize
+periods_grouped_allduration = cell(1,1);
+
+% Accelerations
+% For each possible acceleration .
+periods_grouped_allduration = [periods_grouped_allduration; 'm_accel'];
+
+% Decelerations 
+periods_grouped_allduration = [periods_grouped_allduration; 'm_decel'];
+
+% Starts
+periods_grouped_allduration = [periods_grouped_allduration; 'm_start'];
+
+% Stops
+periods_grouped_allduration = [periods_grouped_allduration; 'm_stop'];
+
+% Finish of accel
+periods_grouped_allduration = [periods_grouped_allduration; 'm_faccel'];
+
+% Finish of decels
+periods_grouped_allduration = [periods_grouped_allduration; 'm_faccel'];
+
+% Finish of starts.
+periods_grouped_allduration = [periods_grouped_allduration; 'm_fstart'];
+
+% Finish of stops 
+periods_grouped_allduration = [periods_grouped_allduration; 'm_fstop'];
+
+% Maintaining -- rest and all speeds.
+periods_grouped_allduration = [periods_grouped_allduration; 'm_maint.rest'];
+periods_grouped_allduration = [periods_grouped_allduration; 'm_maint.walk'];
+
+% Warning of accels
+periods_grouped_allduration = [periods_grouped_allduration; 'w_accel'];
+
+% Warning of decels
+periods_grouped_allduration = [periods_grouped_allduration; 'w_decel'];
+
+% Warning of stops
+periods_grouped_allduration = [periods_grouped_allduration; 'w_stop'];
+
+% Warning of maintaining 
+periods_grouped_allduration = [periods_grouped_allduration; 'w_maint.rest'];
+periods_grouped_allduration = [periods_grouped_allduration; 'w_maint.walk'];
+
+% All continued walk (all speeds)
+periods_grouped_allduration = [periods_grouped_allduration; 'c_walk'];
+
+% Continued rest. 
+periods_grouped_allduration = [periods_grouped_allduration; 'c_rest'];
+
+% Probes.
+
+% Save
+save([dir_out 'periods_grouped_allduration.mat'], 'periods_grouped_allduration');

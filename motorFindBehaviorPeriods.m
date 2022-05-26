@@ -147,6 +147,7 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
         else
             behavior_period.accel = default_accel;
         end
+
         activity_tag = trial{i, activity_column};
     
         % If it's the first stage, set previous speed to 0, just in case
@@ -215,37 +216,124 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
             if behavior_period.two_speeds_ago == 0
                 activity_tag = 3;
             end
-        end 
          
+        % For motor probe no change, change to "maintaining" if the
+        % previous cue was a warning tone for maintaining.
+        elseif activity_tag == 23 && trial{i-1, activity_column} == 12
+            activity_tag = 3;
+        end
+
         % Now concatenate fields based on activity_tag. All concatenated at
         % once. Must divide the "motor: finished ... " periods into recently
-        % finished (< 3 seconds) and the "continued" periods-- have to do 
-        % this here because otherwise you're increasing the size of your
-        % trial list.
+        % finished (< 3 seconds) and the "continued" periods. Also divide 
+        % motor:maintaining into 3 s of maintaining and appropriate type of 
+        % continued. Have to do this here because otherwise you're increasing 
+        % the size of your trial list.
         switch activity_tag
             
-            % Walking periods
-            case num2cell([5, 6, 7, 25]) 
+            % Rest, walking, maintaining, and motor probe no change periods
+            case num2cell([3, 5, 6, 7, 23, 25, 27]) 
                 
                 % If the available time range is above the specified
                 % continued window, divide them and concatenat separately
                 if (behavior_period.time_range(2) - behavior_period.time_range(1)) > (parameters.continued_window * parameters.fps -1)
                    
-                   % Get all the associated parameters
+                   % Get all the associated parameters. 
                    finished_behavior_period = behavior_period;
                    continued_behavior_period = behavior_period;
                    
                    % Divide
                    finished_behavior_period.time_range = [behavior_period.time_range(1), [behavior_period.time_range(1)+parameters.continued_window*parameters.fps-1]];
-                   continued_behavior_period.time_range = [[behavior_period.time_range(1) + parameters.continued_window * parameters.fps], behavior_period.time_range(2)]; 
+                   % If activity tag is already 27 (continued rest), also
+                   % divide the finished period and put it into the
+                   % continued periods, because this only occurs in the
+                   % very first period. 
+                   if activity_tag == 27
+                      continued_behavior_period.time_range = behavior_period.time_range;
+                   else
+                      continued_behavior_period.time_range = [[behavior_period.time_range(1) + parameters.continued_window * parameters.fps], behavior_period.time_range(2)]; 
+                   end
                    
-                   % Concatenate finished period
-                   eval(['all_periods.' parameters.Conditions(activity_tag).short '= [all_periods.' parameters.Conditions(activity_tag).short '; finished_behavior_period];']);
-                   
-                   % Concatenate continued period, depending on if rest or not
+                   % Further divide continued periods into the desired
+                   % time-chunks. Size of chunkcs given by parameters.continued_chunk_length . 
+                   period_length = behavior_period.time_range(2) - behavior_period.time_range(1); 
+
+                   % If this instances is greater than the desired chunk
+                   % length
+                   if period_length > parameters.continued_chunk_length * parameters.fps 
+                      
+                      % find how many chunks the instance can make 
+                      quotient=floor(period_length/(parameters.continued_chunk_length * parameters.fps));
+
+                      % make the first chunk start where the instance starts
+                      new_chunk_start=continued_behavior_period.time_range(1); 
+
+                      % make the first chunk end 1 time window length after the
+                      % start of the instance
+                      new_chunk_end=continued_behavior_period.time_range(1)+parameters.continued_chunk_length * parameters.fps-1; 
+
+                      % Make list of broken down chunks for the stack.
+                      brokendown=[new_chunk_start, new_chunk_end]; 
+
+                      % if the instance can create more than 1 3-second chunk
+                      if quotient>1
+                          for quotienti=1:(quotient-1) % don't use the last one because you're cycling through the *start* of each chunk
+
+                              % find the start of the given chunk
+                              new_chunk_start= continued_behavior_period.time_range(1) + parameters.continued_chunk_length * parameters.fps*quotienti;
+
+                              % find the end of the given chunk
+                              new_chunk_end = continued_behavior_period.time_range(1) + parameters.continued_chunk_length * parameters.fps*(quotienti +1)-1;
+
+                              % concatenate the chunk into your list of 
+                              brokendown=[brokendown; new_chunk_start, new_chunk_end ] ;
+                          end 
+                      end
+                   else
+                       %if it isn't too long (can only happen if exactly the length of the time window)
+                       %make only 1 chunk using the start and stop of the
+                       %instancee
+                       brokendown=[brokendown; periods_holding(instancei,:)];   
+                   end
+
+                   % Replace continued instances with broken-down versions,
+                   % have to do each individually. 
+                   for chunki = 1:size(brokendown,1)
+                        continued_behavior_period(chunki,1).time_range = brokendown(chunki, :);
+                        continued_behavior_period(chunki,1).speed = continued_behavior_period(1).speed;
+                        continued_behavior_period(chunki,1).accel = continued_behavior_period(1).accel;
+                        continued_behavior_period(chunki,1).previous_speed = continued_behavior_period(1).previous_speed;
+                        continued_behavior_period(chunki,1).previous_accel = continued_behavior_period(1).previous_accel;
+                        continued_behavior_period(chunki,1).two_speeds_ago = continued_behavior_period(1).two_speeds_ago;
+                   end 
+
+                   % Concatenate finished period. Don't include if the
+                   % activity tag is already 27 (continued rest), because
+                   % that only occurs in the very first rest period, and
+                   % you don't want the first 3 seconds double-counted.
+                   if activity_tag ~=27
+                       eval(['all_periods.' parameters.Conditions(activity_tag).short '= [all_periods.' parameters.Conditions(activity_tag).short '; finished_behavior_period];']);
+                   end 
+
+                   % Concatenate continued period, depending on if rest,
+                   % maintaining, motor probe no change, or other (walk). 
                    if activity_tag == 5
                        % Put in continued rest
                        eval(['all_periods.' parameters.Conditions(27).short '= [all_periods.' parameters.Conditions(27).short '; continued_behavior_period];']);
+                  
+                   elseif activity_tag == 3 || 23
+                       % If maintaining or motor probe no change, need to see if this is at rest or
+                       % at walking.
+
+                       % If at rest, put in continued rest.
+                       if behavior_period.speed == 0
+                           eval(['all_periods.' parameters.Conditions(27).short '= [all_periods.' parameters.Conditions(27).short '; continued_behavior_period];']);
+
+                       % Otherwise, put in continued walking
+                       else
+                           eval(['all_periods.' parameters.Conditions(26).short '= [all_periods.' parameters.Conditions(26).short '; continued_behavior_period];']);
+                       end
+
                    else
                        % Put in continued walking
                        eval(['all_periods.' parameters.Conditions(26).short '= [all_periods.' parameters.Conditions(26).short '; continued_behavior_period];']);
