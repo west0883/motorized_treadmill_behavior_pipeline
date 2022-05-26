@@ -124,18 +124,18 @@ parameters.loop_variables.mice_all = parameters.mice_all;
 
 % Input values
 parameters.loop_list.things_to_load.log.dir = {'Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\', 'mouse', '\Arduino Output\'};
-parameters.loop_list.things_to_load.log.filename= {'Motor_ArduinoOutput*.log'}; 
+parameters.loop_list.things_to_load.log.filename= {'log'}; 
 parameters.loop_list.things_to_load.log.variable= {}; 
 parameters.loop_list.things_to_load.log.level = 'day';
 parameters.loop_list.things_to_load.log.load_function = @readtext;
 
 % Output values. 
-parameters.loop_list.things_to_save.all_periods.dir = {[parameters.dir_exper 'behavior\extracted motor data\'], 'mouse', '\', 'day', '\'};
-parameters.loop_list.things_to_save.all_periods.filename= {'trial', 'stack', '.mat'};
-parameters.loop_list.things_to_save.all_periods.variable= {'trial'}; 
-parameters.loop_list.things_to_save.all_periods.level = 'stack';
+parameters.loop_list.things_to_save.trial.dir = {[parameters.dir_exper 'behavior\extracted motor data\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.trial.filename= {'trial', 'stack', '.mat'};
+parameters.loop_list.things_to_save.trial.variable= {'trial'}; 
+parameters.loop_list.things_to_save.trial.level = 'stack';
 
-RunAnalysis(@extractMotorData, parameters);
+RunAnalysis({@extractMotorData}, parameters);
 
 %% Extract data and save as .mat file -- with NO Putty
 % Get only mice_all days with putty_for_motor = 'no'.
