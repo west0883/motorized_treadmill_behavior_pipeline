@@ -31,7 +31,7 @@ function [] = extractMotorData(parameters)
             day=mice_all(mousei).days(dayi).name; 
             
             % Create data input directory and cleaner output directory. 
-            dir_in=CreateFileStrings(dir_dataset_name, mouse, day, [], [], false);
+            parameters.dir_in=CreateFileStrings(dir_dataset_name, mouse, day, [], [], false);
             dir_out=[dir_out_base mouse '\' day '\']; 
             mkdir(dir_out); 
             
@@ -49,7 +49,7 @@ function [] = extractMotorData(parameters)
                     filename = stackList.filenames(stacki, :);
                     
                     % Import. The readtext function is amazing.
-                    trial = readtext([dir_in filename]);
+                    trial = readtext([parameters.dir_in filename]);
                     
                     % Save
                     save([dir_out 'trial' stack_number '.mat'], 'trial', '-v7.3');
