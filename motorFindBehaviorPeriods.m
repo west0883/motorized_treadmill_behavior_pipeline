@@ -43,17 +43,38 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
     % Put all info per stage into a structure called behavior_period, then 
     % concatenate each field per activity tag. 
      
-    % Set columns based on useAccel. 
+    % Set columns based on useAccel, putty_flag
+    
+    % If accels used
     if parameters.useAccel 
-        time_column = 1;
-        speed_column = 2;
-        accel_column = 3; 
-        activity_column = 4; 
-    else
-        time_column = 1;
-        speed_column = 2;
-        activity_column = 3;
         
+        % And no putty
+        if ~parameters.putty_flag
+            time_column = 1;
+            speed_column = 2;
+            accel_column = 3; 
+            activity_column = 4; 
+        
+        % And with putty.
+        else
+            time_column = 2;
+            speed_column = 3;
+            accel_column = 4; 
+            activity_column = 5; 
+        end
+    else
+        % & No putty, 
+        if ~parameters.putty_flag
+            time_column = 1;
+            speed_column = 2;
+            activity_column = 3;
+        
+        % & with putty,
+        else
+            time_column = 2;
+            speed_column = 3;
+            activity_column = 4;
+        end
         % Set a defaul accel that was used. 
         default_accel = 800; 
     end 
