@@ -34,14 +34,11 @@ load([parameters.dir_exper 'Behavior_Conditions.mat']);
 parameters.Conditions = Conditions; 
 
 % ****Change here if there are specific mice, days, and/or stacks you want to work with**** 
-% If you want to change the list of stacks, use ListStacks function.
-% Ex: numberVector=2:12; digitNumber=2;
-% Ex cont: stackList=ListStacks(numberVector,digitNumber); 
-% Ex cont: mice_all(1).stacks(1)=stackList;
+parameters.mice_all = [];
+parameters.mice_all(1).name = '1096';
+parameters.mice_all(1).days(1).name = '121721';
+parameters.mice_all(1).days(1).stacks = 6:15;
 
-parameters.mice_all(1).days = parameters.mice_all(1).days(1:6); %(1:6);
-parameters.mice_all(2).days = parameters.mice_all(2).days(1:5); %(1:5);
-parameters.mice_all(3).days = parameters.mice_all(3).days(1:5); %(1:5);
 % **********************************************************************8
 % Input Directories
 
@@ -52,7 +49,7 @@ parameters.mice_all(3).days = parameters.mice_all(3).days(1:5); %(1:5);
 % will be. If you concatenated this as a sigle string, it should create a 
 % file name, with the correct mouse/day/stack name inserted accordingly. 
 parameters.dir_dataset_name={'Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\', 'mouse number', '\Arduino output\'};
-parameters.input_data_name={'0', 'stack number', '.txt' }; 
+parameters.input_data_name={'Motor_ArduinoOutput*.log'}; 
 
 % Give the number of digits that should be included in each stack number.
 parameters.digitNumber=2; 
@@ -84,7 +81,7 @@ parameters.skip = 1200;
 parameters.useAccel = true;
 
 % Was PUTTY used for the recording? 
-parameters.putty_flag = false;
+parameters.putty_flag = true;
 
 % Radius of wheel, in cm.
 parameters.wheel_radius = 8.5;
