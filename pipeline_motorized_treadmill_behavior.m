@@ -39,8 +39,9 @@ parameters.Conditions = Conditions;
 % Ex cont: stackList=ListStacks(numberVector,digitNumber); 
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
- parameters.mice_all = parameters.mice_all(1);
+ parameters.mice_all = parameters.mice_all(2:3);
  parameters.mice_all(1).days = parameters.mice_all(1).days(1:2);
+ parameters.mice_all(2).days = parameters.mice_all(2).days(1:2);
 % **********************************************************************8
 % Input Directories
 
@@ -88,7 +89,10 @@ parameters.putty_flag = false;
 % Radius of wheel, in cm.
 parameters.wheel_radius = 8.5;
                                   
-             
+% Smallest time increment. All accelerations and stage times should be an
+% exact whole second or half second in duration. 
+parameters.smallest_time_increment = 0.5 * parameters.fps;
+
 %% Extract data and save as .mat file.  
 extractMotorData(parameters);
 

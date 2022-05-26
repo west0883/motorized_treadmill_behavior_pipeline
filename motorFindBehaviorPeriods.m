@@ -106,6 +106,12 @@ function [all_periods] = motorFindBehaviorPeriods(trial, parameters)
             continue
         end 
         
+        % Round to nearest multiple of parameters.smallest_time_increment.
+        behavior_period.time_range = parameters.smallest_time_increment .* round(behavior_period.time_range ./ parameters.smallest_time_increment); 
+        
+        % Add + 1 to start of time range, so each time point belongs to exactly one period 
+        behavior_period.time_range(1) = behavior_period.time_range(1) + 1;
+        
         % Pull out the speed, previous speed, and the  "activity tag" for
         % categorizing.
         behavior_period.speed = trial{i, speed_column}; 
