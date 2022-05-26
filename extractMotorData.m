@@ -7,11 +7,6 @@
 
 function [parameters] = extractMotorData(parameters)
 
-    mice_all = parameters.mice_all;
-    dir_dataset_name = parameters.dir_dataset_name;
-    input_data_name = parameters.input_data_name;
-    dir_exper = parameters.dir_exper; 
-    digitNumber = parameters.digitNumber; 
     putty_flag = parameters.putty_flag;
 
     % Announce what stack you're on.
@@ -61,7 +56,8 @@ function [parameters] = extractMotorData(parameters)
         % trial
         if isnan(start_point)
            disp(['Start of trial ' stack_number ' not found']);
-
+            
+           parameters.trial = [];
            parameters.dont_save = true; 
            return 
         end
