@@ -12,14 +12,14 @@ clear all;
 % Output Directories
 
 % Create the experiment name. This is used to name the output folder. 
-parameters.experiment_name='Random Motorized Treadmill\test data';
+parameters.experiment_name='Random Motorized Treadmill';
 
 % Output directory name bases
 parameters.dir_base='Y:\Sarah\Analysis\Experiments\';
 parameters.dir_exper=[parameters.dir_base parameters.experiment_name '\']; 
 
 % *********************************************************
-% Data to preprocess
+% Data to process
 
 % (DON'T EDIT). Load the "mice_all" variable you've created with "create_mice_all.m"
 load([parameters.dir_exper 'mice_all.mat']);
@@ -27,14 +27,22 @@ load([parameters.dir_exper 'mice_all.mat']);
 % Add mice_all to parameters structure.
 parameters.mice_all = mice_all; 
 
+% Load the names of conditions from create_conditions_names.m
+load([parameters.dir_exper 'Behavior_Conditions.mat']); 
+
+% Add Conditions to parameters structure.
+parameters.Conditions = Conditions; 
+
 % ****Change here if there are specific mice, days, and/or stacks you want to work with**** 
 % If you want to change the list of stacks, use ListStacks function.
 % Ex: numberVector=2:12; digitNumber=2;
 % Ex cont: stackList=ListStacks(numberVector,digitNumber); 
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
-%parameters.mice_all(1).days = mice_all(1).days(2:5); 
-
+ parameters.mice_all = parameters.mice_all(1);
+ parameters.mice_all(1).days = parameters.mice_all(1).days(6);
+ parameters.mice_all(1).days(1).stacks = 2:11; 
+ 
 % **********************************************************************8
 % Input Directories
 
@@ -44,11 +52,11 @@ parameters.mice_all = mice_all;
 % number', 'day', or 'stack number' where the mouse, day, or stack number 
 % will be. If you concatenated this as a sigle string, it should create a 
 % file name, with the correct mouse/day/stack name inserted accordingly. 
-parameters.dir_dataset_name={['Y:\Sarah\Data\Motorized Treadmill'], '\', 'day', '\', 'mouse number', '\Arduino output\'};
-parameters.input_data_name={'stack number', '.txt' }; 
+parameters.dir_dataset_name={'Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\', 'mouse number', '\Arduino output\'};
+parameters.input_data_name={'0', 'stack number', '.txt' }; 
 
 % Give the number of digits that should be included in each stack number.
-parameters.digitNumber=3; 
+parameters.digitNumber=2; 
 
 % *************************************************************************
 % Parameters
@@ -73,6 +81,9 @@ parameters.frames=6000;
 % behavior.
 parameters.skip = 1200; 
 
+% Using variable accelerations?
+parameters.useAccel = true;
+
 % Was PUTTY used for the recording? 
 parameters.putty_flag = false;
 
@@ -80,27 +91,10 @@ parameters.putty_flag = false;
 parameters.wheel_radius = 8.5;
                                   
              
-%% Extract data and save as .mat file.  (Can take awhile).
-% From .log if PUTTY was used, from .txt files if it wasn't. 
+%% Extract data and save as .mat file.  
 extractMotorData(parameters);
 
 %% Find behavior periods.
+motor_FindBehaviorPeriods_all(parameters);
 
-% For now, change the input data name--> might do something different later
-parameters.input_data_name={'vel', 'stack number', '.mat'}; 
-
-motorFindBehaviorPeriods(parameters);
-
-%% Segment velocities.
-segmentVelocities(parameters); 
-
-%% Concatenate velocities per behavior period per mouse. 
-% Also finds the average and std.
-concatenateVelocities(parameters);
-
-%% Concatenate velocities per behavior periods across mice.
-% Also finds the average and std.
-averageVelocitiesAcrossMice(parameters);
-
-%% Plot average velocities. 
-
+%% Count types of behavior periods? 
