@@ -78,9 +78,6 @@ parameters.skip = 1200;
 % Using variable accelerations?
 parameters.useAccel = true;
 
-% Was PUTTY used for the recording? 
-parameters.putty_flag = true;
-
 % Radius of wheel, in cm.
 parameters.wheel_radius = 8.5;
                                   
@@ -106,11 +103,70 @@ parameters.accels_startstop = [200, 400, 600, 800];
 % Possible acel/decel accels; issues with 600 being used sometimes
 parameters.accels_acceldecel = [200, 400, 600, 800]; 
 
-%% Extract data and save as .mat file.  
-extractMotorData(parameters);
+%% Extract data and save as .mat file -- with Putty
+
+% Get only mice_all days with putty_for_motor = 'yes'.
+for i = 1:numel(parameters.mice_all)
+    putty_flags = strcmp({parameters.mice_all(i).days.putty_for_motor}, 'yes'); 
+    parameters.mice_all(i).days(~putty_flags) = [];
+end 
+
+% Was PUTTY used for the recording? 
+parameters.putty_flag = true;
+
+% Iterations.
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+               'log', { 'dir("Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\', 'mouse', '\Arduino Output\Motor_ArduinoOutput*.log").name'}, 'log_iterator'; 
+               'stack', {'[loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').stacks; loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').spontaneous]'}, 'stack_iterator'};
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+
+% Input values
+parameters.loop_list.things_to_load.log.dir = {'Y:\Sarah\Data\Random Motorized Treadmill\', 'day', '\', 'mouse', '\Arduino Output\'};
+parameters.loop_list.things_to_load.log.filename= {'Motor_ArduinoOutput*.log'}; 
+parameters.loop_list.things_to_load.log.variable= {}; 
+parameters.loop_list.things_to_load.log.level = 'day';
+parameters.loop_list.things_to_load.log.load_function = @readtext;
+
+% Output values. 
+parameters.loop_list.things_to_save.all_periods.dir = {[parameters.dir_exper 'behavior\extracted motor data\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.all_periods.filename= {'trial', 'stack', '.mat'};
+parameters.loop_list.things_to_save.all_periods.variable= {'trial'}; 
+parameters.loop_list.things_to_save.all_periods.level = 'stack';
+
+RunAnalysis(@extractMotorData, parameters);
+
+%% Extract data and save as .mat file -- with NO Putty
+% Get only mice_all days with putty_for_motor = 'no'.
+for i = 1:numel(parameters.mice_all)
+    putty_flags = strcmp({parameters.mice_all(i).days.putty_for_motor}, 'no'); 
+    parameters.mice_all(i).days(~putty_flags) = [];
+end 
+
 
 %% Find behavior periods.
-motor_FindBehaviorPeriods_all(parameters);
+
+% Iterators
+parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 'mouse_iterator'; 
+               'day', {'loop_variables.mice_all(', 'mouse_iterator', ').days(:).name'}, 'day_iterator';
+               'stack', {'[loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').stacks; loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').spontaneous]'}, 'stack_iterator'};
+
+parameters.loop_variables.mice_all = parameters.mice_all;
+
+% Input
+parameters.loop_list.things_to_load.trial.dir = {[parameters.dir_exper 'behavior\extracted motor data\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_load.trial.filename= {'trial', 'stack', '.mat'};
+parameters.loop_list.things_to_load.trial.variable= {'trial'}; 
+parameters.loop_list.things_to_load.trial.level = 'stack';
+
+% Output
+parameters.loop_list.things_to_save.all_periods.dir = {[parameters.dir_exper 'behavior\period instances\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.all_periods.filename= {'all_periods_', 'stack', '.mat'};
+parameters.loop_list.things_to_save.all_periods.variable= {'all_periods'}; 
+parameters.loop_list.things_to_save.all_periods.level = 'stack';
+
+RunAnalysis({@motorFindBehaviorPeriods}, parameters);
 
 %% Make into more later code-readable structure format
 motor_behavior_period_structures(parameters); 
