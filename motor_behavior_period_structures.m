@@ -48,47 +48,210 @@ function [] = motor_behavior_period_structures(parameters)
                 % Load corresponding data
                 load([parameters.dir_in filename]);
                 
+                % Clear any existing structures.
+                clear holding_structure; 
                 
                 % Re-arrange all possible periods as structures
-                for condi = 1:size(paramters.Conditions,2)
-
+                for condi =1:size(parameters.Conditions,2)
                     short_name = parameters.Conditions(condi).short;
                     
                     eval(['current_type = all_periods.' short_name ';']); 
                   
+                    % Create a field for the current type
+                    eval(['holding_structure.' short_name ' = [];']);
+                    
                     % Only make fields for things we actually care about
                     % per condition type
                     
                     switch condi
                         
-                        % For all warning cue sections, and for the two 
-                        % motor maintaining types, we only care about
-                        % the current speed subdivisions
-                        case num2cell([8:13 18:22 3 17])
-                       
-                        % For all accel and decel periods, we care about the
+                        % For all but start & maintaining warning cues, the two 
+                        % motor maintaining types, the continued walking
+                        % types, and the no change in motor probe,we only 
+                        % care about the current speed subdivisions
+                        case num2cell([9:11 19:21 26])
+                            
+                            % Initialize empty fields 
+                            for speedi = 1: size (parameters.speeds,2)
+                                eval(['holding_structure.' short_name '.x' num2str(parameters.speeds(speedi)) '= [];'])
+                            end 
+                            
+                            for instancei = 1:size(current_type,1)
+                                time_range = current_type(instancei).time_range; 
+                                speed = current_type(instancei).speed;
+                                
+                                if ~isempty(time_range)
+                                    struc_name = ['holding_structure.' short_name '.x' num2str(speed)];
+                                    eval([struc_name '= [' struc_name '; time_range];']);  
+                                end 
+                            end 
+                            
+                        % For accel, decel, faccel, & fdecel we care about the
                         % previous speed, current speed, and acceleration
                         case num2cell([1,2, 14, 15])
                             
-                    end 
-                    for instancei = 1:size( current_type,1)
-                        
-                        speed = current_type.speed;
-                        
-                        
-                        
-                        accel = current_type.speed 
-                    
-                    
-                    
-                    
-                    
+                            % Initialize empty fields 
+                            for speedi = 1: size (parameters.speeds,2)
+                                speed = parameters.speeds(speedi);
+                                for acceli = 1:size(parameters.accels_acceldecel,2)
+                                    accel = parameters.accels_acceldecel(acceli);
+                                    
+                                    for speed2i = 1:size(parameters.speeds,2)
+                                        speed2 = parameters.speeds(speed2i);
+                                        eval(['holding_structure.' short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2) '= [];'])
+                                    end 
+                                end 
+                            end
+                            
+                            for instancei = 1:size(current_type,1)
+                                time_range = current_type(instancei).time_range; 
+                                speed = current_type(instancei).speed;
+                                accel = current_type(instancei).accel;
+                                speed2 = current_type(instancei).previous_speed;
+                                if ~isempty(time_range) 
+                                    struc_name = ['holding_structure.' short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)];
+                                    eval([struc_name '= [' struc_name '; time_range];']);  
+                                end 
+                            end 
+                        % For finished accel & finished decel, we care about 
+                        % current speed, 2 speeds ago, and acceleration
+                        case num2cell([6, 7])   
+                            % Initialize empty fields 
+                            for speedi = 1: size (parameters.speeds,2)
+                                speed = parameters.speeds(speedi);
+                                for acceli = 1:size(parameters.accels_acceldecel,2)
+                                    accel = parameters.accels_acceldecel(acceli);
+                                    
+                                    for speed2i = 1:size(parameters.speeds,2)
+                                        speed2 = parameters.speeds(speed2i);
+                                        eval(['holding_structure.' short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2) '= [];'])
+                                    end 
+                                end 
+                            end
+                            
+                            for instancei = 1:size(current_type,1)
+                                time_range = current_type(instancei).time_range; 
+                                speed = current_type(instancei).speed;
+                                accel = current_type(instancei).accel;
+                                speed2 = current_type(instancei).two_speeds_ago;
+                                if ~isempty(time_range) 
+                                    struc_name = ['holding_structure.' short_name '.x' num2str(speed) '.x' num2str(accel) '.x' num2str(speed2)];
+                                    eval([struc_name '= [' struc_name '; time_range];']);  
+                                end 
+                            end 
+                            
+                            
+                        % For start, no warning start, & finished start, care only about current speed and accel
+                        case num2cell([24, 25, 28])
+                            % Initialize empty fields 
+                            for speedi = 1: size (parameters.speeds,2)
+                                speed = parameters.speeds(speedi);
+                                for acceli = 1:size(parameters.accels_startstop, 2)
+                                    accel = parameters.accels_startstop(acceli);
+                                    eval(['holding_structure.' short_name '.x' num2str(speed) '.x' num2str(accel) '= [];'])
+                            
+                                end 
+                            end
+                            
+                            for instancei = 1:size(current_type,1)
+                                time_range = current_type(instancei).time_range; 
+                                speed = current_type(instancei).speed;
+                                accel = current_type(instancei).accel;
+                                if ~isempty(time_range) 
+                                    struc_name = ['holding_structure.' short_name '.x' num2str(speed) '.x' num2str(accel)];
+                                    eval([struc_name '= [' struc_name '; time_range];']);  
+                                end 
+                            end 
+                            
+                        % For stop & no warning stop, care only about
+                        % previous speed and accel. Include 0 in speeds
+                        % becuase sometimes it's weird.
+                        case num2cell([4, 16])
+                            % Initialize empty fields 
+                            all_speeds = [0 parameters.speeds];
+                            for speedi = 1: size (all_speeds,2)
+                                speed = all_speeds(speedi);
+                                for acceli = 1:size(parameters.accels_startstop,2)
+                                    accel = parameters.accels_startstop(acceli);
+                                    eval(['holding_structure.' short_name '.x' num2str(speed) '.x' num2str(accel) '= [];'])
+                            
+                                end 
+                            end
+                            
+                            for instancei = 1:size(current_type,1)
+                                time_range = current_type(instancei).time_range; 
+                                speed = current_type(instancei).previous_speed;
+                                accel = current_type(instancei).accel;
+                                if ~isempty(time_range) 
+                                    struc_name = ['holding_structure.' short_name '.x' num2str(speed) '.x' num2str(accel)];
+                                    eval([struc_name '= [' struc_name '; time_range];']);  
+                                end 
+                            end 
+                            
+                        % For finished stop, care only about 2 speeds ago
+                        % and accel. Need to include 0.
+                        case 5 
+                            % Initialize empty fields
+                            all_speeds = [0 parameters.speeds];
+                            for speedi = 1: size (all_speeds,2)
+                                speed = all_speeds(speedi);
+                                for acceli = 1:size(parameters.accels_startstop, 2)
+                                    accel = parameters.accels_startstop(acceli);
+                                    eval(['holding_structure.' short_name '.x' num2str(speed) '.x' num2str(accel) '= [];'])
+                            
+                                end 
+                            end
+                            
+                            for instancei = 1:size(current_type,1)
+                                time_range = current_type(instancei).time_range; 
+                                speed = current_type(instancei).two_speeds_ago;
+                                accel = current_type(instancei).accel;
+                                if ~isempty(time_range) 
+                                    struc_name = ['holding_structure.' short_name '.x' num2str(speed) '.x' num2str(accel)];
+                                    eval([struc_name '= [' struc_name '; time_range];']);  
+                                end 
+                            end 
+                            
+                        % For warning start, warning start probe, and continued rest don't
+                        % care about anything
+                        case num2cell([8,18, 27])
+                             for instancei = 1:size(current_type,1)
+                                time_range = current_type(instancei).time_range; 
+                                
+                                if ~isempty(time_range)
+                                    struc_name = ['holding_structure.' short_name];
+                                    eval([struc_name '= [' struc_name '; time_range];']);  
+                                end 
+                             end 
+                            
+                        % Motor maintaining, warning maintaining, probe warning maintaining,and motor no change
+                        % care about all speeds, including 0; and no
+                        % warning
+                        case num2cell([3,12,13,17,22, 23])   
+                             
+                            all_speeds = [0 parameters.speeds];
+                            % Initialize empty fields 
+                            for speedi = 1: size (all_speeds,2)
+                                eval(['holding_structure.' short_name '.x' num2str(all_speeds(speedi)) '= [];'])
+                            end 
+                            
+                            for instancei = 1:size(current_type,1)
+                                time_range = current_type(instancei).time_range; 
+                                speed = current_type(instancei).speed;
+                                
+                                if ~isempty(time_range)
+                                    struc_name = ['holding_structure.' short_name '.x' num2str(speed)];
+                                    eval([struc_name '= [' struc_name '; time_range];']);  
+                                end 
+                            end 
+
                     end 
                 end 
-                
-                
-                
-            end 
+            % Rename holding structure
+            all_periods = holding_structure;
+            
+            % Save     
+            save([dir_out 'all_periods_' stack_number '.mat'], 'all_periods'); 
         end 
     end
 end
