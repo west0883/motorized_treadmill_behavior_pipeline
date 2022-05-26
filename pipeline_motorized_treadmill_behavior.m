@@ -40,9 +40,7 @@ parameters.Conditions = Conditions;
 % Ex cont: mice_all(1).stacks(1)=stackList;
 
  parameters.mice_all = parameters.mice_all(1);
- parameters.mice_all(1).days = parameters.mice_all(1).days(6);
- parameters.mice_all(1).days(1).stacks = 2:11; 
- 
+ parameters.mice_all(1).days = parameters.mice_all(1).days(1:2);
 % **********************************************************************8
 % Input Directories
 
@@ -82,7 +80,7 @@ parameters.frames=6000;
 parameters.skip = 1200; 
 
 % Using variable accelerations?
-parameters.useAccel = true;
+parameters.useAccel = false;
 
 % Was PUTTY used for the recording? 
 parameters.putty_flag = false;
