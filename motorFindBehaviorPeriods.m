@@ -33,7 +33,7 @@
 %  *  27 = Continued rest.
 
 % Input: 
-% useAccel -- a boolean. If accels weren't used, the columns will be
+% useAccel -- number of accelerations used. If only one accel used, the columns will be
 % different.
 % trial -- an nx 4 or n x 5 cell created by extractMotorData.m. Time, speed, [accel,] activity tag, message 
 % Output: 
@@ -52,14 +52,22 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
 
     % Put all info per stage into a structure called behavior_period, then 
     % concatenate each field per activity tag. 
-     
+    
+    % Find putty and accel flags, based on inputed location.
+    putty_flag_location_string = CreateStrings(parameters.location_putty_flag, parameters.keywords, parameters.values);
+    eval(['parameters.putty_flag = ' putty_flag_location_string ';']); 
+
+    accel_flag_location_string = CreateStrings(parameters.location_accel_flag, parameters.keywords, parameters.values);
+    eval(['parameters.useAccel = ' accel_flag_location_string ';']); 
+    
+
     % Set columns based on useAccel, putty_flag
     
     % If accels used
-    if parameters.useAccel 
+    if parameters.useAccel > 1 
         
         % And no putty
-        if ~parameters.putty_flag
+        if ~strcmp(parameters.putty_flag, 'yes')
             time_column = 1;
             speed_column = 2;
             accel_column = 3; 
@@ -74,7 +82,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
         end
     else
         % & No putty, 
-        if ~parameters.putty_flag
+        if ~strcmp(parameters.putty_flag, 'yes')
             time_column = 1;
             speed_column = 2;
             activity_column = 3;
@@ -164,7 +172,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
         % Pull out the speed, previous speed, and the  "activity tag" for
         % categorizing.
         behavior_period.speed = trial{i, speed_column}; 
-        if parameters.useAccel == 1
+        if parameters.useAccel > 1
             behavior_period.accel = trial{i, accel_column}; 
         else
             behavior_period.accel = default_accel;
@@ -179,7 +187,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
         else 
             % Otherwise, get speed and accel from previous stage.
             behavior_period.previous_speed = trial{i - 1, speed_column};
-            if parameters.useAccel == 1 
+            if parameters.useAccel > 1 
                 behavior_period.previous_accel = trial{i - 1, accel_column};
             else
                 behavior_period.previous_accel = default_accel;
