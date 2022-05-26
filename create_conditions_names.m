@@ -334,7 +334,6 @@ for condi =1:size(Conditions,2)
              periods(condi).speed = speeds;
              periods(condi).accel = NaN; 
              periods(condi).previous_speed = NaN;
-             periods(condi).previous_accel = NaN; 
              periods(condi).two_speeds_ago = NaN; 
 
         % For accel, decel, & corresponding probes, we care about the
@@ -344,7 +343,6 @@ for condi =1:size(Conditions,2)
             periods(condi).speed = speeds(2:end);
             periods(condi).accel = accels_acceldecel; 
             periods(condi).previous_speed = speeds(2:end);
-            periods(condi).previous_accel = NaN; 
             periods(condi).two_speeds_ago = NaN; 
             
 
@@ -354,15 +352,13 @@ for condi =1:size(Conditions,2)
             periods(condi).speed = speeds(2:end);
             periods(condi).accel = accels_acceldecel; 
             periods(condi).previous_speed = NaN;
-            periods(condi).previous_accel = NaN; 
             periods(condi).two_speeds_ago = speeds(2:end); 
 
         % For start, no warning start, & finished start, care only about current speed (no 0)and accel
         case num2cell([24, 25, 28])
             periods(condi).speed = speeds(2:end);
             periods(condi).accel = accels_startstop; 
-            periods(condi).previous_speed = NaN;
-            periods(condi).previous_accel = NaN; 
+            periods(condi).previous_speed = NaN; 
             periods(condi).two_speeds_ago = NaN; 
 
         % For stop & no warning stop, care only about
@@ -371,17 +367,14 @@ for condi =1:size(Conditions,2)
             periods(condi).speed = NaN;
             periods(condi).accel = accels_startstop; 
             periods(condi).previous_speed = speeds(2:end);
-            periods(condi).previous_accel = NaN; 
             periods(condi).two_speeds_ago = NaN; 
            
-
         % For finished stop, care only about 2 speeds ago (no 0).
         % and accel. 
         case 5 
             periods(condi).speed = NaN;
             periods(condi).accel = accels_startstop; 
             periods(condi).previous_speed = NaN;
-            periods(condi).previous_accel = NaN; 
             periods(condi).two_speeds_ago = speeds(2:end); 
 
         % For warning start, warning start probe, and continued rest don't
@@ -390,7 +383,6 @@ for condi =1:size(Conditions,2)
             periods(condi).speed = NaN;
             periods(condi).accel = NaN; 
             periods(condi).previous_speed = NaN;
-            periods(condi).previous_accel = NaN; 
             periods(condi).two_speeds_ago = NaN; 
 
     end
@@ -408,7 +400,6 @@ loop_list.iterators = {
                'speed', {'loop_variables.periods(', 'condition_iterator', ').speed'}, 'speed_iterator';
                'accel', {'loop_variables.periods(', 'condition_iterator', ').accel'}, 'accel_iterator';
                'previous_speed', {'loop_variables.periods(', 'condition_iterator', ').previous_speed'}, 'previous_speed_iterator';
-               'previous_accel', {'loop_variables.periods(', 'condition_iterator', ').previous_accel'}, 'previous_accel_iterator';
                'two_speeds_ago', {'loop_variables.periods(', 'condition_iterator', ').two_speeds_ago'}, 'two_speeds_ago_iterator'
                };
 
@@ -431,7 +422,7 @@ looping_output_list = looping_output_list(ia);
 periods = looping_output_list;
 
 % Remove unecessary "iterator" fields.
-fields = {'condition_iterator', 'speed_iterator', 'accel_iterator', 'previous_speed_iterator', 'previous_accel_iterator', 'two_speeds_ago_iterator'};
+fields = {'condition_iterator', 'speed_iterator', 'accel_iterator', 'previous_speed_iterator', 'two_speeds_ago_iterator'};
 periods = rmfield(periods, fields);
 
 % Make into table.
