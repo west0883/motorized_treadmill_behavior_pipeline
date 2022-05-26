@@ -2,7 +2,7 @@
 % Sarah West
 % 11/16/21 
 
-% Use "create_mice_all.m" before using this.
+% Use "create_mice_all.m" and "create_conditions_names.m" before using this.
 
 %% Initial setup
 % Put all needed paramters in a structure called "parameters", which you
