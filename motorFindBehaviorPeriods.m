@@ -106,6 +106,10 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
         eval(['all_periods.' parameters.Conditions(condi).short '.two_speeds_ago = [];']); % May need for immediately post-transition analysis (to know what kind of transition just happened)
     end
     
+    % For the continued behaviors, also include duration_place
+    all_periods.c_rest.duration_place = [];
+    all_periods.c_walk.duration_place = [];
+
     % Find the start of the trial by finding the string 'Starting Mouse
     % Runner' in the first colomn. 
     % Set up a holder for start_point
@@ -311,6 +315,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
 
                       % Make list of broken down chunks for the stack.
                       brokendown=[new_chunk_start, new_chunk_end]; 
+                      duration_place = 1; 
 
                       % if the instance can create more than 1 3-second chunk
                       if quotient>1
@@ -324,6 +329,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
 
                               % concatenate the chunk into your list of 
                               brokendown=[brokendown; new_chunk_start, new_chunk_end ] ;
+                              duration_place = [duration_place; quotienti + 1];
                           end 
                       end
                    else
@@ -331,6 +337,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
                        %make only 1 chunk using the start and stop of the
                        %instancee
                        brokendown=[continued_behavior_period.time_range];   
+                       duration_place = [1];
                    end
 
                    % Replace continued instances with broken-down versions,
@@ -342,6 +349,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
                         continued_behavior_period(chunki,1).previous_speed = continued_behavior_period(1).previous_speed;
                         continued_behavior_period(chunki,1).previous_accel = continued_behavior_period(1).previous_accel;
                         continued_behavior_period(chunki,1).two_speeds_ago = continued_behavior_period(1).two_speeds_ago;
+                        continued_behavior_period(chunki,1).duration_place = duration_place(chunki);
                    end 
 
                    % Concatenate finished period. Don't include if the
