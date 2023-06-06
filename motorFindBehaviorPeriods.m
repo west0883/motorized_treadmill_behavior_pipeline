@@ -104,11 +104,8 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
         eval(['all_periods.' parameters.Conditions(condi).short '.previous_speed = [];']); % Needed for immediately post-transition. Is the starting speed for transition periods 
         eval(['all_periods.' parameters.Conditions(condi).short '.previous_accel = [];']); % Needed for immediately post-transition
         eval(['all_periods.' parameters.Conditions(condi).short '.two_speeds_ago = [];']); % May need for immediately post-transition analysis (to know what kind of transition just happened)
+        eval(['all_periods.' parameters.Conditions(condi).short '.duration_place = [];']); % Needed for continued rest and walk
     end
-    
-    % For the continued behaviors, also include duration_place
-    all_periods.c_rest.duration_place = [];
-    all_periods.c_walk.duration_place = [];
 
     % Find the start of the trial by finding the string 'Starting Mouse
     % Runner' in the first colomn. 
@@ -392,6 +389,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
             % If periods don't need to be divided, concatenate normally     
             otherwise     
                 duration = behavior_period.time_range(2) - behavior_period.time_range(1);
+                behavior_period.duration_place = [];
                 eval(['all_periods.' parameters.Conditions(activity_tag).short '= [all_periods.' parameters.Conditions(activity_tag).short '; behavior_period];']);
         end 
    
