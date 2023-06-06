@@ -15,7 +15,7 @@ function [parameters] = MotorBehaviorPeriodsTable(parameters)
     parameters.all_periods_table.time_ranges(:) = cell(size(parameters.Conditions,1), 1); 
     
     % List field names needed for information about each time range. 
-    information_fields = {'speed', 'accel', 'previous_speed', 'previous_accel', 'two_speeds_ago'};
+    information_fields = {'speed', 'accel', 'previous_speed', 'previous_accel', 'two_speeds_ago', 'duration_place'};
 
     % Display progress message to user.
     MessageToUser('Finding ', parameters);
