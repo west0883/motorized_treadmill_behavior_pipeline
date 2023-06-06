@@ -55,7 +55,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
     % Find putty and accel flags, based on inputed location.
     putty_flag_location_string = CreateStrings(parameters.location_putty_flag, parameters.keywords, parameters.values);
     eval(['parameters.putty_flag = ' putty_flag_location_string ';']); 
-
+  
     accel_flag_location_string = CreateStrings(parameters.location_accel_flag, parameters.keywords, parameters.values);
     eval(['parameters.useAccel = ' accel_flag_location_string ';']); 
     
@@ -98,13 +98,13 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
   
     % Initialize empty behavior condition variables with fields
     for condi = 1:size(parameters.Conditions,2)
-        eval(['all_periods.' parameters.Conditions(condi).short '.time_range = [];']);
-        eval(['all_periods.' parameters.Conditions(condi).short '.speed = [];']); % The current speed. Is the ending speed for speed transitions
-        eval(['all_periods.' parameters.Conditions(condi).short '.accel = [];']); % Needed for speed transitions
-        eval(['all_periods.' parameters.Conditions(condi).short '.previous_speed = [];']); % Needed for immediately post-transition. Is the starting speed for transition periods 
-        eval(['all_periods.' parameters.Conditions(condi).short '.previous_accel = [];']); % Needed for immediately post-transition
-        eval(['all_periods.' parameters.Conditions(condi).short '.two_speeds_ago = [];']); % May need for immediately post-transition analysis (to know what kind of transition just happened)
-        eval(['all_periods.' parameters.Conditions(condi).short '.duration_place = [];']); % Needed for continued rest and walk
+        all_periods.(parameters.Conditions(condi).short).time_range = [];
+        all_periods.(parameters.Conditions(condi).short).speed = []; % The current speed. Is the ending speed for speed transitions
+        all_periods.(parameters.Conditions(condi).short).accel = []; % Needed for speed transitions
+        all_periods.(parameters.Conditions(condi).short).previous_speed = []; % Needed for immediately post-transition. Is the starting speed for transition periods 
+        all_periods.(parameters.Conditions(condi).short).previous_accel = []; % Needed for immediately post-transition
+        all_periods.(parameters.Conditions(condi).short).two_speeds_ago = []; % May need for immediately post-transition analysis (to know what kind of transition just happened)
+        all_periods.(parameters.Conditions(condi).short).duration_place = []; % Needed for continued rest and walk
     end
 
     % Find the start of the trial by finding the string 'Starting Mouse
