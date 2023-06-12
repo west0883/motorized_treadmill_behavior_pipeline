@@ -48,6 +48,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
    
     % For convenience
     trial = parameters.trial; 
+    duration_place_maximum_default = parameters.duration_place_maximum_default;
 
     % Put all info per stage into a structure called behavior_period, then 
     % concatenate each field per activity tag. 
@@ -312,7 +313,12 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
 
                       % Make list of broken down chunks for the stack.
                       brokendown=[new_chunk_start, new_chunk_end]; 
-                      duration_place = 1; 
+
+                      if continued_behavior_period.time_range(1) == 1
+                          duration_place = duration_place_maximum_default;
+                      else 
+                          duration_place = 1;
+                      end 
 
                       % if the instance can create more than 1 3-second chunk
                       if quotient>1
@@ -326,7 +332,15 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
 
                               % concatenate the chunk into your list of 
                               brokendown=[brokendown; new_chunk_start, new_chunk_end ] ;
-                              duration_place = [duration_place; quotienti + 1];
+
+                              % if the continued period is the very start
+                              % of the stack, make duration place the
+                              % maximum default
+                              if continued_behavior_period.time_range(1) == 1
+                                  duration_place = [duration_place; duration_place_maximum_default];
+                              else 
+                                  duration_place = [duration_place; quotienti + 1];
+                              end 
                           end 
                       end
                    else
