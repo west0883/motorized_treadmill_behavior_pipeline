@@ -34,7 +34,7 @@ load([parameters.dir_exper 'Behavior_Conditions.mat']);
 parameters.Conditions = Conditions; 
 
 % ****Change here if there are specific mice, days, and/or stacks you want to work with**** 
-parameters.mice_all = parameters.mice_all(1);
+parameters.mice_all = parameters.mice_all;
 %parameters.mice_all(1).days = parameters.mice_all(1).days(13:end);
 
 
@@ -223,6 +223,7 @@ parameters.loop_list.iterators = {'mouse', {'loop_variables.mice_all(:).name'}, 
                'stack', {'loop_variables.mice_all(',  'mouse_iterator', ').days(', 'day_iterator', ').stacks'}, 'stack_iterator'};
 
 parameters.loop_variables.mice_all = parameters.mice_all;
+parameters.duration_place_maximum_default = 25; 
 
 % Tell code where to find Putty and Accel flags as strings in CreateStrings
 % format
