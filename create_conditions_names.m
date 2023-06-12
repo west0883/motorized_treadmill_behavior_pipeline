@@ -429,10 +429,9 @@ periods = rmfield(periods, fields);
 periods = struct2table(periods);
 
 indices_to_remove = []; 
-% Add a column for duration, in frames.
+% Add a column for duration, in frames; and for duration_place for
+% continued rest & walk
 for periodi = 1:size(periods,1)
-
-    % Exceptions: 
 
     % For all finished periods & maintaining
     if strcmp(periods.condition{periodi}(1:3), 'm_f') ...
@@ -514,6 +513,16 @@ for periodi = 1:size(periods,1)
         periods.duration{periodi} = abs(duration);
 
     end
+
+    % Duration_place 
+    if strcmp(periods.condition{periodi}, 'c_rest') || strcmp(periods.condition{periodi}, 'c_walk')
+       
+        periods.duration_place{periodi} = []; 
+    else
+        periods.duration_place{periodi} = NaN;
+        
+    end 
+
 
 end 
 
