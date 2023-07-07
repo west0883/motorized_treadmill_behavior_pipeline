@@ -107,6 +107,8 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
         all_periods.(parameters.Conditions(condi).short).two_speeds_ago = []; % May need for immediately post-transition analysis (to know what kind of transition just happened)
         all_periods.(parameters.Conditions(condi).short).duration_place = []; % Needed for continued rest and walk
     end
+    continued_rest_long = []; 
+    continued_walk_long = []; 
 
     % Find the start of the trial by finding the string 'Starting Mouse
     % Runner' in the first colomn. 
@@ -297,6 +299,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
                    % time-chunks. Size of chunkcs given by parameters.continued_chunk_length . 
                    period_length = continued_behavior_period.time_range(2) - (continued_behavior_period.time_range(1)-1); 
 
+
                    % If this instances is greater than the desired chunk
                    % length
                    if period_length > parameters.continued_chunk_length * parameters.fps 
@@ -351,6 +354,8 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
                        duration_place = [1];
                    end
 
+                   continued_behavior_long = continued_behavior_period.time_range;
+
                    % Replace continued instances with broken-down versions,
                    % have to do each individually. 
                    for chunki = 1:size(brokendown,1)
@@ -375,6 +380,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
                    % maintaining, motor probe no change, or other (walk). 
                    if activity_tag == 5
                        % Put in continued rest
+                       continued_rest_long = [continued_rest_long; continued_behavior_long];
                        eval(['all_periods.' parameters.Conditions(27).short '= [all_periods.' parameters.Conditions(27).short '; continued_behavior_period];']);
                   
                    elseif activity_tag == 3 || 23
@@ -392,6 +398,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
 
                    else
                        % Put in continued walking
+                       continued_walk_long = [continued_walk_long; continued_behavior_long];
                        eval(['all_periods.' parameters.Conditions(26).short '= [all_periods.' parameters.Conditions(26).short '; continued_behavior_period];']);
                    end
                    
@@ -411,5 +418,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
 
     % Put all_periods into parameters.
     parameters.all_periods = all_periods;
+    parameters.long_periods.rest = continued_rest_long;
+    parameters.long_periods.walk = continued_walk_long;
 end
 
