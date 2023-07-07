@@ -10,12 +10,13 @@ function [parameters] = MotorBehaviorPeriodsTable(parameters)
     period_names = fieldnames(parameters.all_periods);
 
     % Establish all_periods_table as Conditions plus a field for time
-    % ranges
+    % ranges, a field for duration_place
     parameters.all_periods_table = parameters.Conditions;
     parameters.all_periods_table.time_ranges(:) = cell(size(parameters.Conditions,1), 1); 
-    
+    parameters.all_periods_table.duration_place(:) = cell(size(parameters.Conditions,1), 1);
+   
     % List field names needed for information about each time range. 
-    information_fields = {'speed', 'accel', 'previous_speed', 'previous_accel', 'two_speeds_ago', 'duration_place'};
+    information_fields = {'speed', 'accel', 'previous_speed', 'two_speeds_ago'};
 
     % Display progress message to user.
     MessageToUser('Finding ', parameters);
@@ -101,6 +102,9 @@ function [parameters] = MotorBehaviorPeriodsTable(parameters)
                 % Put these in the correct time range entry, concatenated with
                 % any previous instances.
                 parameters.all_periods_table.time_ranges{index} = [parameters.all_periods_table.time_ranges{index}; occurances_structure(instancei).time_range];
+            
+                % do the same with duration_place
+                 parameters.all_periods_table.duration_place{index} = [parameters.all_periods_table.duration_place{index}; occurances_structure(instancei).duration_place];
             end
         end 
     end 
