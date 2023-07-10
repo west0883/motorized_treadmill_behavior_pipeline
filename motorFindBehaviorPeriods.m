@@ -383,7 +383,7 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
                        continued_rest_long = [continued_rest_long; continued_behavior_long];
                        eval(['all_periods.' parameters.Conditions(27).short '= [all_periods.' parameters.Conditions(27).short '; continued_behavior_period];']);
                   
-                   elseif activity_tag == 3 || 23
+                   elseif activity_tag == 3 || activity_tag == 23
                        % If maintaining or motor probe no change, need to see if this is at rest or
                        % at walking.
 
