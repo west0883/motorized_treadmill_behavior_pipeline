@@ -389,10 +389,12 @@ function [parameters] = motorFindBehaviorPeriods(parameters)
 
                        % If at rest, put in continued rest.
                        if behavior_period.speed == 0
+                           continued_rest_long = [continued_rest_long; continued_behavior_long];
                            eval(['all_periods.' parameters.Conditions(27).short '= [all_periods.' parameters.Conditions(27).short '; continued_behavior_period];']);
 
                        % Otherwise, put in continued walking
                        else
+                           continued_walk_long = [continued_walk_long; continued_behavior_long];
                            eval(['all_periods.' parameters.Conditions(26).short '= [all_periods.' parameters.Conditions(26).short '; continued_behavior_period];']);
                        end
 
