@@ -237,10 +237,16 @@ parameters.loop_list.things_to_load.trial.variable= {'trial'};
 parameters.loop_list.things_to_load.trial.level = 'stack';
 
 % Output
+% all periods
 parameters.loop_list.things_to_save.all_periods.dir = {[parameters.dir_exper 'behavior\motorized\period instances\'], 'mouse', '\', 'day', '\'};
 parameters.loop_list.things_to_save.all_periods.filename= {'all_periods_', 'stack', '.mat'};
 parameters.loop_list.things_to_save.all_periods.variable= {'all_periods'}; 
 parameters.loop_list.things_to_save.all_periods.level = 'stack';
+% time ranges of not-brokendown rest and walk
+parameters.loop_list.things_to_save.long_periods.dir = {[parameters.dir_exper 'behavior\motorized\period instances\'], 'mouse', '\', 'day', '\'};
+parameters.loop_list.things_to_save.long_periods.filename= {'long_periods_', 'stack', '.mat'};
+parameters.loop_list.things_to_save.long_periods.variable= {'long_periods'}; 
+parameters.loop_list.things_to_save.long_periods.level = 'stack';
 
 RunAnalysis({@motorFindBehaviorPeriods}, parameters);
 
@@ -281,5 +287,4 @@ parameters.loop_list.things_to_save.all_periods_table.variable= {'all_periods'};
 parameters.loop_list.things_to_save.all_periods_table.level = 'stack';
  
 RunAnalysis({@MotorBehaviorPeriodsTable}, parameters); 
-
 
